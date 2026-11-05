@@ -1,0 +1,53 @@
+{
+  "n_heldout": 562,
+  "parties": {
+    "DA": {
+      "tested": true,
+      "delta_elpd": 15.7,
+      "se": 3.6,
+      "elpd_spatial": -486.7,
+      "elpd_no_spatial": -502.4,
+      "keep_spatial": true
+    },
+    "ANC": {
+      "tested": true,
+      "delta_elpd": 3.4,
+      "se": 4.6,
+      "elpd_spatial": -427.8,
+      "elpd_no_spatial": -431.2,
+      "keep_spatial": false
+    },
+    "ACTIONSA": {
+      "tested": true,
+      "delta_elpd": 101.9,
+      "se": 21.9,
+      "elpd_spatial": -596.6,
+      "elpd_no_spatial": -698.6,
+      "keep_spatial": true
+    },
+    "MK": {
+      "tested": false,
+      "keep_spatial": true,
+      "note": "did not contest 2021; kept (default)"
+    },
+    "EFF": {
+      "tested": true,
+      "delta_elpd": 4.4,
+      "se": 3.8,
+      "elpd_spatial": -551.0,
+      "elpd_no_spatial": -555.4,
+      "keep_spatial": false
+    },
+    "OTHER": {
+      "tested": true,
+      "delta_elpd": 24.5,
+      "se": 7.9,
+      "elpd_spatial": -535.6,
+      "elpd_no_spatial": -560.0,
+      "keep_spatial": true
+    }
+  },
+  "turnout_common_factor": {
+    "keep_spatial": true
+  }
+}
