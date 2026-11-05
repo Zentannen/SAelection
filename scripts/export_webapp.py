@@ -120,7 +120,7 @@ def main(out_dir: Path):
     (out_dir / "wards.geojson").write_text(json.dumps(geo, separators=(",", ":")))
 
     # predictions.json
-    preds = {"generated_at": meta["generated_at"], "model": "Bayesian spatial VD model (saelection.live)",
+    preds = {"generated_at": meta["generated_at"], "model": meta["model"]["inference"].get("method", ""),
              "pct_vds_counted": meta["pct_vds_counted"],
              "wards": {str(w["id"]): unit_prediction(w) for w in wards},
              "overall": unit_prediction(prov), "districts": district_predictions()}

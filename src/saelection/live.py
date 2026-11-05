@@ -377,7 +377,27 @@ def flat_table(recs):
 
 
 # ----------------------------------------------------------------------------- main entry
-def run(n_draws=500, seed=0, out_dir: Path = OUT):
+def project_with_method(method: str, d: Design, seed=0):
+    """Project with a benchmarked method (saelection.bench, 'module:function') instead of the
+    Bayesian model. Uses the same live case the live check scores methods on, so the projection
+    shipped is exactly the one that was validated. Returns (votes (S, n, 7), counted, info)."""
+    from .bench.harness import resolve
+    from .bench.live_check import load_live_case
+    case, arrival, files = load_live_case()
+    if not np.array_equal(case.vd, d.vd):
+        raise ValueError("live case VD order differs from the design")
+    counted = arrival >= 0
+    label, fn = resolve(method)
+    proj = fn(case, counted, np.random.default_rng(seed))
+    V = proj.draws if proj.draws is not None else proj.vd_mean[None]
+    votes = np.rint(np.clip(V, 0, None)).astype(np.int64)
+    votes[:, counted, :] = np.rint(case.Y[counted]).astype(np.int64)[None]
+    info = {"method": f"bench method {method}", "n_vd_observations": int(counted.sum()),
+            "n_draws": int(votes.shape[0]), "method_info": proj.info or {}}
+    return votes, counted, info
+
+
+def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     cfg = json.loads((ROOT / "config" / "live.json").read_text())
     prior = cfg["prior"]
     prior["shares"] = [prior["valid_vote_shares"][p] for p in PARTIES]
@@ -449,7 +469,13 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
     if any(l == "ward" for l, _ in agg_units) and any(l == "muni" for l, _ in agg_units):
         warnings.append("both ward and municipality progress given: municipality rows used for fitting only")
 
-    votes, counted, info = project(d, h, R, observed, prior, n_draws=n_draws, seed=seed, aggs=aggs)
+    if method:
+        if aggs:
+            warnings.append("progress_*.csv rows are ignored when a bench method is used")
+            aggs, agg_units = [], []
+        votes, counted, info = project_with_method(method, d, seed=seed)
+    else:
+        votes, counted, info = project(d, h, R, observed, prior, n_draws=n_draws, seed=seed, aggs=aggs)
     S = votes.shape[0]
     Yc = np.where(counted[:, None], votes[0], 0)                       # counted VD results (n, 7)
 
