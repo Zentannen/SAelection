@@ -280,13 +280,14 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
 def load_observed(folder: Path = OBSERVED):
     """VD-level IEC result CSVs (any *.csv not named progress_*)."""
     files = sorted(f for f in folder.glob("*.csv") if not f.name.startswith("progress_"))
-    obs, reg = {}, {}
+    obs, reg, ward = {}, {}, {}
     for f in files:
         t = load_results_file(f, "LGE", "LGE2026")
         for r in t.itertuples(index=False):
             obs[int(r.vd)] = np.array([getattr(r, c) for c in CATS], float)
             reg[int(r.vd)] = float(r.registered)
-    return obs, reg, [f.name for f in files]
+            ward[int(r.vd)] = int(r.ward)
+    return obs, reg, ward, [f.name for f in files]
 
 
 def load_progress(folder: Path = OBSERVED):
@@ -385,7 +386,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
 
     d = build_design(None, "LGE2021", "PE2024", 2026, name="LGE2026<-LGE2021+PE2024")
     h = merged_hyper()
-    observed, reg_obs, files = load_observed()
+    observed, reg_obs, ward_obs, files = load_observed()
     progress, pfiles = load_progress()
     warnings = []
     if observed and progress:
@@ -395,6 +396,10 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
     base = cw.groupby("vd")["vd_regpop"].first().reindex(d.vd).to_numpy(float)
     vdset = set(d.vd)
     counted_vds = [v for v in observed if v in vdset]
+    # counted VDs that are not in the 2026 VD boundary set (new or special stations): no
+    # geometry or history, so they are not modelled, but their actual votes are added to
+    # their ward (and so to the municipality and province) totals below.
+    unmatched = {v: (ward_obs[v], observed[v]) for v in observed if v not in vdset}
 
     # ward and municipality membership matrices (split VDs allocated by registered share)
     wards = sorted(cw.ward.unique())
@@ -452,6 +457,19 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
     V_w = np.einsum("wn,snc->swc", Wm, votes)
     C_w = np.broadcast_to(Wm @ Yc, V_w.shape).astype(float).copy()
     f_w = (Wm @ counted.astype(float)) / Wm.sum(1)
+    extra_w = np.zeros((len(wards), len(CATS)))
+    lost = []
+    for v, (w, row) in unmatched.items():
+        if w in widx:
+            extra_w[widx[w]] += row
+        else:
+            lost.append(v)
+    if unmatched:
+        warnings.append(f"{len(unmatched)} counted VDs are not in the 2026 VD boundary set; their actual "
+                        f"votes ({int(sum(r[:K].sum() for _, r in unmatched.values())):,} valid) are added "
+                        f"to their ward totals unmodelled" + (f"; {len(lost)} with unknown ward dropped: {lost}" if lost else ""))
+    V_w = V_w + extra_w[None]
+    C_w = C_w + extra_w[None]
     ward_agg = {j: a for (l, j), a in zip(agg_units, aggs) if l == "ward"}
     for j, a in ward_agg.items():
         f = a["f"]
