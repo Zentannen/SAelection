@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import json
 import os
-from functools import partial
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path
 
 os.environ.setdefault("XLA_FLAGS", "--xla_force_host_platform_device_count=4")
@@ -98,18 +98,8 @@ def merged_hyper(sources=("T1", "T2")):
     return out
 
 
-def fixed_effects(d: Design, h, slopes=True) -> np.ndarray:
-    cross = d.X1 @ h["C1"].T + d.X2 @ h["C2"].T
-    return cross + (h["b1"] * d.X1 + h["b2"] * d.X2 if slopes else 0.0)
-
-
-# Live-count calibration (tuned on the 2024 count-replay backtest, artifacts/backtest_summary.csv)
-B_SD = 0.02          # prior sd of past-performance slopes around their trained values (freeing them
-                     # further made stronghold-first counts extrapolate worse in the backtest)
-KAPPA_PROV = 0.06    # model-discrepancy sd (log-ratio) shared by all uncounted VDs ...
-KAPPA_GAMMA = 0.08   # ... plus this times the gap in past party strength between counted and
-                     # uncounted VDs (an unrepresentative count leaves more room for surprise)
-KAPPA_MUNI = 0.06    # municipal discrepancy sd for uncounted VDs
+def fixed_effects(d: Design, h) -> np.ndarray:
+    return h["b1"] * d.X1 + h["b2"] * d.X2 + d.X1 @ h["C1"].T + d.X2 @ h["C2"].T
 
 
 # ----------------------------------------------------------------------------- live model
@@ -118,7 +108,7 @@ def _softmax_abstain_j(eta):
     return jax.nn.softmax(e, axis=-1)
 
 
-def live_model(F, X1, X2, b1_loc, b2_loc, b_sd, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd, R,
+def live_model(F, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd, R,
                z=None, v=None, obs_mask=None,
                agg_W=None, agg_z=None, agg_v=None, agg_num=None, agg_ref=None, agg_mask=None):
     """VD-level counts enter through z (alr of the VD result); ward / municipal partial counts
@@ -128,9 +118,6 @@ def live_model(F, X1, X2, b1_loc, b2_loc, b_sd, muni, n_muni, edges, sig_d, sigm
     n = F.shape[0]
     J = K + 1
     A = numpyro.sample("A", dist.Normal(A_loc, A_sd).to_event(1))
-    # past-performance slopes re-estimated from the count (differential swing), around training values
-    b1 = numpyro.sample("b1", dist.Normal(b1_loc, b_sd).to_event(1))
-    b2 = numpyro.sample("b2", dist.Normal(b2_loc, b_sd).to_event(1))
     d_raw = numpyro.sample("d_raw", dist.Normal(0.0, 1.0).expand([n_muni, K]).to_event(2))
     phi = numpyro.sample("phi", dist.ImproperUniform(dist.constraints.real_vector, (), (n, J)))
     diff2 = jnp.sum((phi[edges[:, 0]] - phi[edges[:, 1]]) ** 2, axis=0)
@@ -138,7 +125,7 @@ def live_model(F, X1, X2, b1_loc, b2_loc, b_sd, muni, n_muni, edges, sig_d, sigm
     numpyro.factor("car", -0.5 * jnp.sum(quad))
     psi = numpyro.sample("psi", dist.MultivariateNormal(jnp.zeros(K), scale_tril=Lcov).expand([n]).to_event(1))
     phi = phi * on
-    eta = A + d_raw[muni] * sig_d + F + b1 * X1 + b2 * X2 + phi[:, :K] + phi[:, K:] + psi
+    eta = A + d_raw[muni] * sig_d + F + phi[:, :K] + phi[:, K:] + psi
     if z is not None:
         with numpyro.handlers.mask(mask=obs_mask):
             numpyro.sample("z", dist.Normal(eta, jnp.sqrt(v)), obs=z)
@@ -176,16 +163,6 @@ def calibrate_A(F, R, h, d, shares, turnout, rng, n_mc=60, iters=40):
         tot = np.einsum("snk,n->k", p, R) / (S * R.sum())
         A = A + np.log(target[:K] / tot[:K]) - np.log(target[K] / tot[K])
     return A
-
-
-def _live_init(site=None, A_loc=None):
-    if site is None:
-        return partial(_live_init, A_loc=A_loc)
-    if site["name"] == "A":
-        return jnp.asarray(A_loc, jnp.float32)
-    if site["name"] in ("phi", "psi", "d_raw"):
-        return jnp.zeros(site["fn"].shape(), jnp.float32)
-    return numpyro.infer.init_to_median(site)
 
 
 def aggregate_observations(aggs, h):
@@ -243,17 +220,12 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
     J = K + 1
     if counted.sum() == 0 and not aggs:
         A = A_loc + rng.standard_normal((S, K)) * A_sd
-        b1 = h["b1"] + rng.standard_normal((S, K)) * B_SD
-        b2 = h["b2"] + rng.standard_normal((S, K)) * B_SD
         delta = rng.standard_normal((S, len(d.muni_codes), K)) * h["sig_d"]
         phi = sample_car(np.tile(h["sigma"], (S, 1)), np.tile(lam_eff, (S, 1)), d.edges, d.n, rng)
         info = {"method": "prior simulation (nothing counted yet)"}
     else:
         z, v = alr(Yobs), alr_var(Yobs)
-        kw = dict(F=jnp.asarray(fixed_effects(d, h, slopes=False), jnp.float32),
-                  X1=jnp.asarray(d.X1, jnp.float32), X2=jnp.asarray(d.X2, jnp.float32),
-                  b1_loc=jnp.asarray(h["b1"], jnp.float32), b2_loc=jnp.asarray(h["b2"], jnp.float32),
-                  b_sd=float(B_SD), muni=jnp.asarray(d.muni), n_muni=len(d.muni_codes),
+        kw = dict(F=jnp.asarray(F, jnp.float32), muni=jnp.asarray(d.muni), n_muni=len(d.muni_codes),
                   edges=jnp.asarray(d.edges),
                   sig_d=jnp.asarray(h["sig_d"], jnp.float32), sigma=jnp.asarray(h["sigma"], jnp.float32),
                   lam=jnp.asarray(lam_eff, jnp.float32), on=jnp.asarray(h["spatial"], jnp.float32), Lcov=jnp.asarray(h["Lcov"], jnp.float32),
@@ -266,13 +238,20 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
             ao = aggregate_observations(aggs, h)
             kw.update({k: jnp.asarray(x, jnp.float32 if x.dtype == float else x.dtype) for k, x in ao.items()})
 
-        guide = AutoNormal(live_model, init_loc_fn=partial(_live_init, A_loc=A_loc), init_scale=0.02)
+        def init(site=None):
+            if site is None:
+                return partial(init)
+            if site["name"] == "A":
+                return jnp.asarray(A_loc, jnp.float32)
+            return jnp.zeros(site["fn"].shape(), jnp.float32) if site["name"] in ("phi", "psi", "d_raw") \
+                else numpyro.infer.init_to_median(site)
+
+        guide = AutoNormal(live_model, init_loc_fn=partial(init), init_scale=0.02)
         opt = optax.adam(optax.cosine_decay_schedule(0.02, vi_steps, alpha=0.02))
         res = SVI(live_model, guide, opt, Trace_ELBO()).run(jax.random.PRNGKey(seed), vi_steps,
                                                             progress_bar=False, **kw)
         post = guide.sample_posterior(jax.random.PRNGKey(seed + 1), res.params, sample_shape=(S,))
         A = np.asarray(post["A"])
-        b1, b2 = np.asarray(post["b1"]), np.asarray(post["b2"])
         delta = np.asarray(post["d_raw"]) * h["sig_d"]
         phi = np.asarray(post["phi"]).copy()
         if counted.any() and not aggs:
@@ -286,44 +265,29 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
     phi = phi * h["spatial"].astype(float)              # fields switched off contribute nothing
     # VD-specific party residuals of uncounted VDs are not informed by any data: exact prior
     psi = rng.standard_normal((S, d.n, K)) @ h["Lcov"].T
-    F0 = fixed_effects(d, h, slopes=False)
-    eta = (A[:, None, :] + delta[:, d.muni, :] + F0[None] + b1[:, None, :] * d.X1 + b2[:, None, :] * d.X2
-           + phi[..., :K] + phi[..., K:] + psi)
-    # model discrepancy for VDs still to come: a shared provincial + municipal shift that the
-    # model structure cannot see (e.g. late-counting areas swinging differently)
-    unc = ~counted
-    gap = np.zeros(K)
-    if counted.any() and unc.any():
-        Xb = 0.5 * (d.X1 + d.X2)
-        gap = np.abs(np.average(Xb[counted], 0, R[counted]) - np.average(Xb[unc], 0, R[unc]))
-    kprov = KAPPA_PROV + KAPPA_GAMMA * gap
-    disc = (rng.standard_normal((S, 1, K)) * kprov
-            + (rng.standard_normal((S, len(d.muni_codes), K)) * KAPPA_MUNI)[:, d.muni, :])
-    eta[:, unc, :] += disc[:, unc, :] if disc.shape[1] > 1 else disc
+    eta = A[:, None, :] + delta[:, d.muni, :] + F[None] + phi[..., :K] + phi[..., K:] + psi
     p = _softmax_abstain(eta)
     votes = np.empty((S, d.n, len(CATS)), np.int64)
     Rn = np.round(R).astype(np.int64)
     for s in range(S):
         votes[s] = rng.multinomial(Rn, p[s])
     votes[:, counted, :] = Yobs[counted].astype(np.int64)[None]
-    info.update(A_prior_mean=A_loc.round(3).tolist(), A_post_mean=A.mean(0).round(3).tolist(),
-                b1_post_mean=b1.mean(0).round(3).tolist(), b2_post_mean=b2.mean(0).round(3).tolist(),
-                calibration={"b_sd": B_SD, "kappa_prov": kprov.round(3).tolist(), "kappa_muni": KAPPA_MUNI,
-                             "counted_vs_uncounted_gap": gap.round(3).tolist()})
+    info.update(A_prior_mean=A_loc.round(3).tolist(), A_post_mean=A.mean(0).round(3).tolist())
     return votes, counted, info
 
 
 # ----------------------------------------------------------------------------- observed results
 def load_observed(folder: Path = OBSERVED):
     """VD-level IEC result CSVs (any *.csv not named progress_*)."""
-    files = sorted(f for f in folder.glob("*.csv") if not f.name.startswith(("progress_", "iec_live")))
-    obs, reg = {}, {}
+    files = sorted(f for f in folder.glob("*.csv") if not f.name.startswith("progress_"))
+    obs, reg, ward = {}, {}, {}
     for f in files:
         t = load_results_file(f, "LGE", "LGE2026")
         for r in t.itertuples(index=False):
             obs[int(r.vd)] = np.array([getattr(r, c) for c in CATS], float)
             reg[int(r.vd)] = float(r.registered)
-    return obs, reg, [f.name for f in files]
+            ward[int(r.vd)] = int(r.ward)
+    return obs, reg, ward, [f.name for f in files]
 
 
 def load_progress(folder: Path = OBSERVED):
@@ -442,7 +406,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
 
     d = build_design(None, "LGE2021", "PE2024", 2026, name="LGE2026<-LGE2021+PE2024")
     h = merged_hyper()
-    observed, reg_obs, files = load_observed()
+    observed, reg_obs, ward_obs, files = load_observed()
     progress, pfiles = load_progress()
     warnings = []
     if observed and progress:
@@ -452,57 +416,44 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     base = cw.groupby("vd")["vd_regpop"].first().reindex(d.vd).to_numpy(float)
     vdset = set(d.vd)
     counted_vds = [v for v in observed if v in vdset]
+    # counted VDs that are not in the 2026 VD boundary set (new or special stations): no
+    # geometry or history, so they are not modelled, but their actual votes are added to
+    # their ward (and so to the municipality and province) totals below.
+    unmatched = {v: (ward_obs[v], observed[v]) for v in observed if v not in vdset}
 
     # ward and municipality membership matrices (split VDs allocated by registered share)
     wards = sorted(cw.ward.unique())
     widx = {w: j for j, w in enumerate(wards)}
     vidx = {v: i for i, v in enumerate(d.vd)}
+    # each VD belongs to exactly one ward, as the IEC reports it: the ward on the results file for
+    # counted VDs, else the IEC's official VD list (scripts/fetch_iec_vd_wards.py), else the
+    # geometry crosswalk's main ward. (The fractional geometry crosswalk mis-assigned VDs.)
+    from .bench.live_check import vd_wards
+    vd_ward = vd_wards(d.vd)
+    for v in counted_vds:
+        if ward_obs.get(v) in widx:
+            vd_ward[vidx[v]] = ward_obs[v]
     Wm = np.zeros((len(wards), d.n))
-    for r in cw.itertuples(index=False):
-        Wm[widx[r.ward], vidx[r.vd]] += r.ward_weight
-    wmeta = cw.groupby("ward").agg(muni=("muni", "first"), ward_no=("ward_no", "first"), n_vd=("vd", "nunique"))
+    for i, w in enumerate(vd_ward):
+        if w in widx:
+            Wm[widx[w], i] = 1.0
+    wmeta = cw.groupby("ward").agg(muni=("muni", "first"), ward_no=("ward_no", "first"))
+    wmeta["n_vd"] = Wm.sum(1).astype(int)
     munis = d.muni_codes
     Mm = np.zeros((len(munis), d.n))
     Mm[d.muni, np.arange(d.n)] = 1
     ward_muni = np.array([munis.index(wmeta.muni[w]) for w in wards])
 
-    live_csv = OBSERVED / "iec_live_vd.csv"
-    live_extra = {}            # ward index -> PR-equivalent votes of counted VDs not in the 2026 layer
-    live_meta = None
-    if live_csv.exists():
-        # IEC dashboard feed (iec_live.py): per-VD PR-equivalent votes + per-municipality RegPop
-        L = pd.read_csv(live_csv)
-        live_meta = json.loads((OBSERVED / "iec_live_munis.json").read_text())
-        reg26 = {m["muni"]: m["registered_2026"] for m in live_meta}
-        g_m = {m: reg26[m] / base[d.muni == munis.index(m)].sum() for m in munis if m in reg26}
-        growth_vec = np.array([g_m.get(munis[k], 1.0) for k in d.muni])
-        R = base * growth_vec
-        growth = float(R.sum() / base.sum())
-        growth_src = "per municipality: IEC 2026 RegPop / 2024 certified roll"
-        files.append(live_csv.name)
-        for r in L[L.counted].itertuples(index=False):
-            cnt = np.array([getattr(r, p) for p in PARTIES], float)
-            if r.vd in vidx:
-                i = vidx[r.vd]
-                R[i] = max(R[i], cnt.sum() * 1.02)
-                observed[int(r.vd)] = np.append(cnt, R[i] - cnt.sum())
-            elif r.ward in widx:
-                live_extra.setdefault(widx[r.ward], np.zeros(K))
-                live_extra[widx[r.ward]] += cnt
-        counted_vds = [v for v in observed if v in vdset]
-        live_vds = L.groupby("ward").agg(n=("vd", "size"), c=("counted", "sum"))
-    elif counted_vds:
+    if counted_vds:
         b_ = pd.Series(base, index=d.vd)
         growth = sum(reg_obs[v] for v in counted_vds) / b_.loc[counted_vds].sum()
         growth_src = "estimated from counted VDs (2026 registered / 2024 certified)"
-        R = base * growth
     else:
         growth = cfg.get("registered_growth_vs_2024", 1.0)
         growth_src = "config/live.json registered_growth_vs_2024"
-        R = base * growth
+    R = base * growth
     for v in counted_vds:
-        if v in reg_obs:
-            R[vidx[v]] = reg_obs[v]
+        R[vidx[v]] = reg_obs[v]
 
     # partial counts per ward / municipality -> aggregate observations
     aggs, agg_units = [], []
@@ -541,20 +492,20 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     # ---- wards: projected draws, then counted part + projected remainder where only partial
     V_w = np.einsum("wn,snc->swc", Wm, votes)
     C_w = np.broadcast_to(Wm @ Yc, V_w.shape).astype(float).copy()
-    f_w = (Wm @ counted.astype(float)) / Wm.sum(1)
-    # counted VDs that exist only in the live feed (new 2026 VDs): add their actual votes to the ward
-    # and take the same number of valid votes out of the ward's still-projected VDs (those voters
-    # were inside the parent VD's registered roll)
-    unc = ~counted
-    for j, ex in live_extra.items():
-        U = np.einsum("n,snc->sc", Wm[j] * unc, votes)                    # projected, uncounted part
-        uv = U[:, :K].sum(-1, keepdims=True)
-        scale = np.clip(1 - ex.sum() / np.maximum(uv, 1), 0, 1)
-        V_w[:, j, :K] = V_w[:, j, :K] - U[:, :K] * (1 - scale) + ex
-        C_w[:, j, :K] += ex
-    if live_meta is not None:
-        f_w = np.array([live_vds.c.get(w, 0) / live_vds.n.get(w, 1) if w in live_vds.index else f_w[j]
-                        for j, w in enumerate(wards)])
+    f_w = (Wm @ counted.astype(float)) / np.maximum(Wm.sum(1), 1)
+    extra_w = np.zeros((len(wards), len(CATS)))
+    lost = []
+    for v, (w, row) in unmatched.items():
+        if w in widx:
+            extra_w[widx[w]] += row
+        else:
+            lost.append(v)
+    if unmatched:
+        warnings.append(f"{len(unmatched)} counted VDs are not in the 2026 VD boundary set; their actual "
+                        f"votes ({int(sum(r[:K].sum() for _, r in unmatched.values())):,} valid) are added "
+                        f"to their ward totals unmodelled" + (f"; {len(lost)} with unknown ward dropped: {lost}" if lost else ""))
+    V_w = V_w + extra_w[None]
+    C_w = C_w + extra_w[None]
     ward_agg = {j: a for (l, j), a in zip(agg_units, aggs) if l == "ward"}
     for j, a in ward_agg.items():
         f = a["f"]
@@ -585,10 +536,11 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     # ---- records
     nodes = pd.read_csv(PROCESSED / "vd_nodes_2026.csv").set_index("vd").reindex(d.vd)
     prim = cw.sort_values("ward_weight").groupby("vd").last().reindex(d.vd)
-    vd_extra = [{"muni": prim.muni.iloc[i], "ward": int(prim.ward.iloc[i]), "station": prim.station.iloc[i],
+    vd_extra = [{"muni": prim.muni.iloc[i], "ward": int(vd_ward[i]), "station": prim.station.iloc[i],
                  "lon": float(nodes.lon.iloc[i]), "lat": float(nodes.lat.iloc[i]),
                  "status": "counted" if counted[i] else "projected",
-                 "ward_pct_counted": round(100 * float(f_w[widx[int(prim.ward.iloc[i])]]), 1)} for i in range(d.n)]
+                 "ward_pct_counted": round(100 * float(f_w[widx[int(vd_ward[i])]]), 1) if int(vd_ward[i]) in widx else None}
+                for i in range(d.n)]
     vd_recs = summarise_units(votes, counted.astype(float), [int(v) for v in d.vd], vd_extra)
     w_extra = [{"muni": wmeta.muni[w], "ward_no": int(wmeta.ward_no[w]), "n_vd": int(wmeta.n_vd[w])} for w in wards]
     ward_recs = summarise_units(V_w, f_w, [int(w) for w in wards], w_extra, counted=C_w)
@@ -605,7 +557,6 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
         "n_vds": int(d.n), "n_vds_counted_exact": int(counted.sum()), "pct_vds_counted": round(100 * float(f_p[0]), 2),
         "observed_files": files, "progress_files": pfiles, "n_progress_units": len(aggs),
         "warnings": warnings, "n_draws": S,
-        "iec_feed": live_meta,
         "registered_total": int(R.sum()), "registered_growth": round(float(growth), 4), "registered_growth_source": growth_src,
         "prior": {k: prior[k] for k in ("name", "valid_vote_shares", "turnout", "A_sd", "sources") if k in prior},
         "model": {
@@ -622,7 +573,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
             "votes = projected FINAL votes (counted + still to come); counted_votes / remaining_votes split them.",
             "Counted VDs carry their actual result (p05 = p50 = p95). Projected VDs are posterior predictive draws.",
             "With ward-level progress only, a partially counted ward = its counted votes + (1 - pct counted) x its projection; VD records stay projections for the whole VD.",
-            "Ward totals allocate a split VD's votes to wards by each piece's share of registered voters.",
+            "Each VD counts in one ward, as the IEC reports it (results file for counted VDs, else the IEC VD list, else the geometry crosswalk).",
             "p_first = probability the party has the most PR votes in that unit.",
         ],
     }

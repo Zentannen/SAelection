@@ -45,6 +45,7 @@ def load_live_case(snapshot: str | None = None):
     if snapshot:
         files = [f for f in files if f.name <= snapshot]
     pos = {v: i for i, v in enumerate(d.vd)}
+    iec_ward = {}
     Y = np.zeros((d.n, len(CATS)))
     reg_obs = np.full(d.n, np.nan)
     arrival = np.full(d.n, -1)
@@ -57,6 +58,7 @@ def load_live_case(snapshot: str | None = None):
                 continue
             Y[i] = [getattr(r, c) for c in CATS]
             reg_obs[i] = r.registered
+            iec_ward[i] = int(r.ward)
             if arrival[i] < 0:
                 arrival[i] = s
     cw = pd.read_csv(PROCESSED / "vd_ward_crosswalk_2026.csv")
@@ -64,7 +66,9 @@ def load_live_case(snapshot: str | None = None):
     rep = arrival >= 0
     growth = np.nansum(reg_obs[rep]) / base[rep].sum() if rep.any() else 1.0
     registered = np.where(rep, np.maximum(reg_obs, Y.sum(1)), base * growth)
-    ward = cw.sort_values("ward_weight").groupby("vd")["ward"].last().reindex(d.vd).fillna(-1).astype(np.int64).to_numpy()
+    ward = vd_wards(d.vd)
+    for i, w in iec_ward.items():          # a counted VD's ward as the IEC reports it
+        ward[i] = w
     nodes = pd.read_csv(PROCESSED / "vd_nodes_2026.csv").set_index("vd").reindex(d.vd)
     lge, p1 = _counts(hist, "LGE2021", d.vd)
     pe, p2 = _counts(hist, "PE2024", d.vd)
@@ -73,6 +77,18 @@ def load_live_case(snapshot: str | None = None):
                 registered=registered, prev_lge=_fill(lge, p1, d.edges), prev_pe=_fill(pe, p2, d.edges),
                 hist_present=p1 & p2, X1=d.X1, X2=d.X2, design=d)
     return case, arrival, [f.name for f in files]
+
+
+def vd_wards(vds: np.ndarray) -> np.ndarray:
+    """One ward per 2026 VD: the IEC's official list (scripts/fetch_iec_vd_wards.py) where
+    available, else the geometry crosswalk's main ward. The IEC reports each VD in one ward."""
+    cw = pd.read_csv(PROCESSED / "vd_ward_crosswalk_2026.csv")
+    w = cw.sort_values("ward_weight").groupby("vd")["ward"].last()
+    f = PROCESSED / "vd_ward_iec_2026.csv"
+    if f.exists():
+        iec = pd.read_csv(f).drop_duplicates("vd").set_index("vd")["ward"]
+        w = iec.combine_first(w)
+    return w.reindex(vds).fillna(-1).astype(np.int64).to_numpy().copy()
 
 
 def area_type(case: Case) -> np.ndarray:
