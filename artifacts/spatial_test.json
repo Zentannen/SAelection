@@ -40,7 +40,7 @@
     },
     "OTHER": {
       "tested": true,
-      "delta_elpd": 24.5,
+      "delta_elpd": 24.4,
       "se": 7.9,
       "elpd_spatial": -535.6,
       "elpd_no_spatial": -560.0,
