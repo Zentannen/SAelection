@@ -61,7 +61,14 @@ PYTHONPATH=src python -m saelection.backtest   # artifacts/backtest_*.csv (count
 python scripts/run_live.py           # output/live/: projections for the frontend
 ```
 
-To condition on the count, put the IEC 2026 per-VD result CSVs in `data/observed_2026/`
+**Live count (IEC dashboard feed).** `scripts/update_live.sh` runs one refresh cycle:
+`python -m saelection.iec_live` pulls `results.elections.org.za/dashboards/lge/MapsJason/2026/EEID1887Munic<id>.js`
+for the 9 Gauteng municipalities (per-VD votes, counting progress, 2026 registered voters). It converts the
+per-VD all-ballot votes to PR-equivalent votes, re-runs the projection, and exports the web-app files to
+`output/frontend/` (`predictions.json`, `results.json`, `wards.geojson`, in the contract of the map app on branch
+`claude/eager-mayer-vzaen0`). About 3 minutes per cycle on 4 CPUs.
+
+Alternatively, put the IEC 2026 per-VD result CSVs in `data/observed_2026/`
 (see the README there) and re-run `scripts/run_live.py`. Before any VD is counted, the projection
 uses the poll prior in `config/live.json`.
 

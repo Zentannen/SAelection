@@ -1,0 +1,182 @@
+[
+  {
+    "muni": "EKU",
+    "report_date": "2026-11-05T12:56:30.3165691+02:00",
+    "vd_expected": 653,
+    "vds_complete": 151,
+    "pct_vds_complete": 23.0,
+    "registered_2026": 1711998,
+    "ballots_per_voter": 1.9975,
+    "pr_valid": 159111,
+    "pr_by_party": {
+      "DA": 60197,
+      "ANC": 27970,
+      "ACTIONSA": 28574,
+      "MK": 8759,
+      "EFF": 8142,
+      "OTHER": 25469
+    },
+    "spoilt": 5397,
+    "special_votes": 11131
+  },
+  {
+    "muni": "JHB",
+    "report_date": "2026-11-05T12:57:00.5831314+02:00",
+    "vd_expected": 862,
+    "vds_complete": 146,
+    "pct_vds_complete": 16.0,
+    "registered_2026": 2417915,
+    "ballots_per_voter": 1.9999,
+    "pr_valid": 163018,
+    "pr_by_party": {
+      "DA": 63562,
+      "ANC": 28872,
+      "ACTIONSA": 27968,
+      "MK": 6851,
+      "EFF": 11212,
+      "OTHER": 24553
+    },
+    "spoilt": 3649,
+    "special_votes": 9437
+  },
+  {
+    "muni": "TSH",
+    "report_date": "2026-11-05T12:57:06.753905+02:00",
+    "vd_expected": 796,
+    "vds_complete": 168,
+    "pct_vds_complete": 21.0,
+    "registered_2026": 1684463,
+    "ballots_per_voter": 1.9974,
+    "pr_valid": 123851,
+    "pr_by_party": {
+      "DA": 36354,
+      "ANC": 27020,
+      "ACTIONSA": 32647,
+      "MK": 2611,
+      "EFF": 7217,
+      "OTHER": 18002
+    },
+    "spoilt": 4062,
+    "special_votes": 8740
+  },
+  {
+    "muni": "GT421",
+    "report_date": "2026-11-05T12:57:14.3502374+02:00",
+    "vd_expected": 168,
+    "vds_complete": 4,
+    "pct_vds_complete": 2.0,
+    "registered_2026": 371556,
+    "ballots_per_voter": 1.9994,
+    "pr_valid": 5419,
+    "pr_by_party": {
+      "DA": 2996,
+      "ANC": 619,
+      "ACTIONSA": 229,
+      "MK": 68,
+      "EFF": 173,
+      "OTHER": 1334
+    },
+    "spoilt": 53,
+    "special_votes": 547
+  },
+  {
+    "muni": "GT422",
+    "report_date": "2026-11-05T12:57:16.2705221+02:00",
+    "vd_expected": 39,
+    "vds_complete": 21,
+    "pct_vds_complete": 53.0,
+    "registered_2026": 66306,
+    "ballots_per_voter": 1.9968,
+    "pr_valid": 17132,
+    "pr_by_party": {
+      "DA": 9918,
+      "ANC": 2847,
+      "ACTIONSA": 796,
+      "MK": 591,
+      "EFF": 812,
+      "OTHER": 2168
+    },
+    "spoilt": 351,
+    "special_votes": 1054
+  },
+  {
+    "muni": "GT423",
+    "report_date": "2026-11-05T12:57:16.5348251+02:00",
+    "vd_expected": 40,
+    "vds_complete": 22,
+    "pct_vds_complete": 55.0,
+    "registered_2026": 55720,
+    "ballots_per_voter": 2.004,
+    "pr_valid": 13401,
+    "pr_by_party": {
+      "DA": 4338,
+      "ANC": 3665,
+      "ACTIONSA": 502,
+      "MK": 1464,
+      "EFF": 965,
+      "OTHER": 2467
+    },
+    "spoilt": 326,
+    "special_votes": 1329
+  },
+  {
+    "muni": "GT481",
+    "report_date": "2026-11-05T12:57:16.2379218+02:00",
+    "vd_expected": 115,
+    "vds_complete": 56,
+    "pct_vds_complete": 48.0,
+    "registered_2026": 202233,
+    "ballots_per_voter": 1.9953,
+    "pr_valid": 45103,
+    "pr_by_party": {
+      "DA": 19994,
+      "ANC": 9764,
+      "ACTIONSA": 3571,
+      "MK": 1213,
+      "EFF": 2645,
+      "OTHER": 7916
+    },
+    "spoilt": 960,
+    "special_votes": 4992
+  },
+  {
+    "muni": "GT484",
+    "report_date": "2026-11-05T12:57:16.4074511+02:00",
+    "vd_expected": 77,
+    "vds_complete": 21,
+    "pct_vds_complete": 27.0,
+    "registered_2026": 98869,
+    "ballots_per_voter": 2.0041,
+    "pr_valid": 6643,
+    "pr_by_party": {
+      "DA": 2196,
+      "ANC": 1895,
+      "ACTIONSA": 239,
+      "MK": 352,
+      "EFF": 478,
+      "OTHER": 1483
+    },
+    "spoilt": 387,
+    "special_votes": 569
+  },
+  {
+    "muni": "GT485",
+    "report_date": "2026-11-05T12:57:23.0407995+02:00",
+    "vd_expected": 86,
+    "vds_complete": 48,
+    "pct_vds_complete": 55.0,
+    "registered_2026": 142004,
+    "ballots_per_voter": 1.9944,
+    "pr_valid": 33893,
+    "pr_by_party": {
+      "DA": 10393,
+      "ANC": 9864,
+      "ACTIONSA": 2356,
+      "MK": 2167,
+      "EFF": 3011,
+      "OTHER": 6102
+    },
+    "spoilt": 1067,
+    "special_votes": 3786
+  }
+]

@@ -26,7 +26,17 @@
    - party codes there: `ANC, DA, EFF, MK, IFP, PA, ActionSA, FF+` (note `ActionSA`, not `ACTIONSA`).
    An exporter from `output/live/wards.json` → these files still needs writing (`confidence` ≈ winner's `p_first`).
 
-## IEC 2026 live data (results.elections.org.za, now reachable)
+## UPDATE 13:15 — live feed found and wired in
+- Per-VD live data: `https://results.elections.org.za/dashboards/lge/MapsJason/2026/EEID1887Munic<id>.js`
+  (ids in `src/saelection/iec_live.py`). VD figures are ward+PR combined → divided by ballots-per-voter (≈2.0).
+- `scripts/update_live.sh` = fetch → project → export `output/frontend/` for the map app.
+- First run (12:57 data, 22% of VDs): DA 35.7%, ANC 22.6%, Other 15.3%, ActionSA 14.9%, EFF 6.7%, MK 4.8%;
+  turnout ~53% of registered (counted VDs: 52.7% vs 45.3% in the same VDs in 2021).
+- Known: 90% intervals look too narrow (fixed structural params + mean-field VI); a reduced count-replay
+  backtest (`artifacts/backtest_summary.csv`) checks coverage — inflate if coverage < 90%.
+- 88 VDs exist only in the live feed (new 2026 VDs): their counted votes are added at ward level.
+
+## IEC 2026 live data (older notes)
 - Municipal "Results Summary – All Ballots" (Excel, live, all parties, Ward/PR/DC40 columns):
   `https://results.elections.org.za/home/LGEPublicReports/1887/Detailed Results/GP/{JHB|TSH|EKU|GT421|...|DC42|DC48}.xls`
   (1887 = 2026 LGE event id). JHB at 12:40: PR valid 159,622, PR votes cast 161,262 — partial count, no VD count in the file.

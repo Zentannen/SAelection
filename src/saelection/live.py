@@ -281,7 +281,7 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
 # ----------------------------------------------------------------------------- observed results
 def load_observed(folder: Path = OBSERVED):
     """VD-level IEC result CSVs (any *.csv not named progress_*)."""
-    files = sorted(f for f in folder.glob("*.csv") if not f.name.startswith("progress_"))
+    files = sorted(f for f in folder.glob("*.csv") if not f.name.startswith(("progress_", "iec_live")))
     obs, reg = {}, {}
     for f in files:
         t = load_results_file(f, "LGE", "LGE2026")
@@ -411,16 +411,43 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
     Mm[d.muni, np.arange(d.n)] = 1
     ward_muni = np.array([munis.index(wmeta.muni[w]) for w in wards])
 
-    if counted_vds:
+    live_csv = OBSERVED / "iec_live_vd.csv"
+    live_extra = {}            # ward index -> PR-equivalent votes of counted VDs not in the 2026 layer
+    live_meta = None
+    if live_csv.exists():
+        # IEC dashboard feed (iec_live.py): per-VD PR-equivalent votes + per-municipality RegPop
+        L = pd.read_csv(live_csv)
+        live_meta = json.loads((OBSERVED / "iec_live_munis.json").read_text())
+        reg26 = {m["muni"]: m["registered_2026"] for m in live_meta}
+        g_m = {m: reg26[m] / base[d.muni == munis.index(m)].sum() for m in munis if m in reg26}
+        growth_vec = np.array([g_m.get(munis[k], 1.0) for k in d.muni])
+        R = base * growth_vec
+        growth = float(R.sum() / base.sum())
+        growth_src = "per municipality: IEC 2026 RegPop / 2024 certified roll"
+        files.append(live_csv.name)
+        for r in L[L.counted].itertuples(index=False):
+            cnt = np.array([getattr(r, p) for p in PARTIES], float)
+            if r.vd in vidx:
+                i = vidx[r.vd]
+                R[i] = max(R[i], cnt.sum() * 1.02)
+                observed[int(r.vd)] = np.append(cnt, R[i] - cnt.sum())
+            elif r.ward in widx:
+                live_extra.setdefault(widx[r.ward], np.zeros(K))
+                live_extra[widx[r.ward]] += cnt
+        counted_vds = [v for v in observed if v in vdset]
+        live_vds = L.groupby("ward").agg(n=("vd", "size"), c=("counted", "sum"))
+    elif counted_vds:
         b_ = pd.Series(base, index=d.vd)
         growth = sum(reg_obs[v] for v in counted_vds) / b_.loc[counted_vds].sum()
         growth_src = "estimated from counted VDs (2026 registered / 2024 certified)"
+        R = base * growth
     else:
         growth = cfg.get("registered_growth_vs_2024", 1.0)
         growth_src = "config/live.json registered_growth_vs_2024"
-    R = base * growth
+        R = base * growth
     for v in counted_vds:
-        R[vidx[v]] = reg_obs[v]
+        if v in reg_obs:
+            R[vidx[v]] = reg_obs[v]
 
     # partial counts per ward / municipality -> aggregate observations
     aggs, agg_units = [], []
@@ -454,6 +481,19 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
     V_w = np.einsum("wn,snc->swc", Wm, votes)
     C_w = np.broadcast_to(Wm @ Yc, V_w.shape).astype(float).copy()
     f_w = (Wm @ counted.astype(float)) / Wm.sum(1)
+    # counted VDs that exist only in the live feed (new 2026 VDs): add their actual votes to the ward
+    # and take the same number of valid votes out of the ward's still-projected VDs (those voters
+    # were inside the parent VD's registered roll)
+    unc = ~counted
+    for j, ex in live_extra.items():
+        U = np.einsum("n,snc->sc", Wm[j] * unc, votes)                    # projected, uncounted part
+        uv = U[:, :K].sum(-1, keepdims=True)
+        scale = np.clip(1 - ex.sum() / np.maximum(uv, 1), 0, 1)
+        V_w[:, j, :K] = V_w[:, j, :K] - U[:, :K] * (1 - scale) + ex
+        C_w[:, j, :K] += ex
+    if live_meta is not None:
+        f_w = np.array([live_vds.c.get(w, 0) / live_vds.n.get(w, 1) if w in live_vds.index else f_w[j]
+                        for j, w in enumerate(wards)])
     ward_agg = {j: a for (l, j), a in zip(agg_units, aggs) if l == "ward"}
     for j, a in ward_agg.items():
         f = a["f"]
@@ -504,6 +544,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT):
         "n_vds": int(d.n), "n_vds_counted_exact": int(counted.sum()), "pct_vds_counted": round(100 * float(f_p[0]), 2),
         "observed_files": files, "progress_files": pfiles, "n_progress_units": len(aggs),
         "warnings": warnings, "n_draws": S,
+        "iec_feed": live_meta,
         "registered_total": int(R.sum()), "registered_growth": round(float(growth), 4), "registered_growth_source": growth_src,
         "prior": {k: prior[k] for k in ("name", "valid_vote_shares", "turnout", "A_sd", "sources") if k in prior},
         "model": {
