@@ -118,9 +118,9 @@ Ward boundaries change between elections, so past results must be mapped onto **
 
 ## Party colours
 
-Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). Only the main ward-winning parties (ANC, DA, EFF, MK, IFP) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, because eight colours can't all be told apart reliably, especially by colour-blind readers. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
+Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). Only the main ward-winning parties (ANC, DA, EFF, MK, IFP, ActionSA) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, because eight colours can't all be told apart reliably, especially by colour-blind readers. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
 
-The five party colours follow each party's usual colour, adjusted in lightness to stay distinguishable, and were checked with a colour-blindness validator. The closest pair is MK and ANC for red-blind (protan) readers, which is acceptable only because names are always shown alongside. Re-check if you change the colours.
+The ANC, DA, EFF, MK and IFP colours follow each party's usual colour and ActionSA is shown in teal; all were adjusted in lightness to stay distinguishable and were checked with a colour-blindness validator. The closest pair is MK and ANC for red-blind (protan) readers, which is acceptable only because names are always shown alongside. Re-check if you change the colours.
 
 ## Project layout
 
