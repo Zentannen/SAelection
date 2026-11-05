@@ -86,7 +86,7 @@ Overwrite this file as results arrive. The app picks up the new file within a mi
 
 ## Coalition scenario plan
 
-[`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md) is a coalition scenario playbook built from comparative cases, mostly Central and Eastern Europe. It sets out what governments formed under different vote-share configurations and party values, how long they lasted and why, then maps those patterns onto Johannesburg, Tshwane, Ekurhuleni and the Gauteng provincial government.
+The app's **Coalition scenarios** view (header switch, or `/#scenarios`) shows the playbook: a Gauteng table from vote-share bands to likely governments, nine configurations with foreign cases drawn as vote-share bars, party archetypes, regularities, national pressure and the province. Its content lives in `src/scenarios.ts`; the long-form version is [`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md), a coalition scenario playbook built from comparative cases, mostly Central and Eastern Europe. It sets out what governments formed under different vote-share configurations and party values, how long they lasted and why, then maps those patterns onto Johannesburg, Tshwane, Ekurhuleni and the Gauteng provincial government.
 
 ## Party colours
 
@@ -100,11 +100,15 @@ The five party colours follow each party's usual colour but were adjusted in lig
 public/data/                 wards.geojson, predictions.json, results.json
 scripts/generate-sample-data.mjs
 src/
-  App.tsx                    page layout, colour-by toggle, map legend
+  App.tsx                    header, view switch (ward map / coalition scenarios)
+  scenarios.ts               coalition scenario content and foreign cases
   data.ts                    loading + ring-winding fix
   lib/model.ts               per-ward summaries, 60s results polling
   parties.ts                 party names + colours
   components/
+    map-view.tsx             ward map page: colour-by toggle, legend, cards
+    scenarios-view.tsx       coalition scenarios page
+    vote-bar.tsx             vote-share bar coloured by role in government
     ward-map.tsx             SVG map, boundaries, pan/zoom
     ward-hover-card.tsx      hover card (current result vs prediction)
     party-chart.tsx          wards-by-party bar chart

@@ -91,7 +91,7 @@ It fails or breaks when they are similar in size and compete for the same voters
 | **Bulgaria 2021–24** | Repeated splits of roughly 25 / 23 / 13 / 10 | Seven elections in about 3½ years | Governments of 6–9 months | The anti-corruption camp refused the old dominant party; the old dominant party couldn't find partners |
 | **Ireland 2020** | SF 24.5 (most votes, excluded), FF 22.2, FG 20.9, Greens 7.1 | FF + FG + Greens with a rotating Taoiseach | Full term, rotation completed | Historic rivals united against a third force and used rotation to share the top job |
 
-**Lesson:** in three-way splits, **the largest party is often excluded**; second or even fifth place can lead. Governments are short unless the two partners are institutional parties that agree a rotation in writing. Where new elections are available, deadlock leads to repeated elections (Bulgaria). Where they aren't, it leads to repeated reshuffles and changes of leader.
+**Lesson:** in three-way splits, **the largest party is often excluded**; second place can lead even with half the leader's vote. Governments are short unless the two partners are institutional parties that agree a rotation in writing. Where new elections are available, deadlock leads to repeated elections (Bulgaria). Where they aren't, it leads to repeated reshuffles and changes of leader.
 
 ### Configuration 4: the declining dominant party plus its splinters and radical flank reach 50%
 
