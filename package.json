@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "generate:sample": "node scripts/generate-sample-data.mjs"
+    "generate:sample": "node scripts/generate-sample-data.mjs",
+    "fetch:results": "node scripts/fetch-iec-results.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

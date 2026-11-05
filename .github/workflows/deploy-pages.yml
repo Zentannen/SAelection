@@ -4,6 +4,9 @@ on:
   push:
     branches: [main, claude/intelligent-maxwell-egkihk]
   workflow_dispatch:
+  # Refresh the count every 10 minutes (GitHub only runs schedules from the default branch).
+  schedule:
+    - cron: "*/10 * * * *"
 
 permissions:
   contents: read
@@ -24,13 +27,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Use empty data for test deploys (not main)
-        if: github.ref != 'refs/heads/main'
-        run: |
-          rm -f public/data/history.json
-          echo '{"type":"FeatureCollection","features":[]}' > public/data/wards.geojson
-          echo '{"wards":{}}' > public/data/predictions.json
-          echo '{"wards":{}}' > public/data/results.json
+      - name: Fetch the live IEC count for Gauteng
+        # Falls back to the committed results.json if the IEC feed is unreachable.
+        continue-on-error: true
+        env:
+          PREVIOUS_RESULTS_URL: https://zentannen.github.io/SAelection/data/results.json
+        run: node scripts/fetch-iec-results.mjs
       - run: npm run build
       - uses: actions/configure-pages@v5
         with:

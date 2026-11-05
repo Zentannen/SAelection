@@ -28,6 +28,19 @@ The layout is designed for laptop and desktop screens.
 
 The ward is the basic unit of South Africa's local government elections, and wards roll up into municipalities and districts. On election night you want to know whether the forecast is holding at every level: overall, in each district, and in the individual wards that are swinging. Tables of thousands of wards don't show that at a glance. This app starts from the general prediction, lets you drill into a district, and puts each ward's trend and count one click away.
 
+## Gauteng 2026 data
+
+The deployed site shows the 2026 local government elections in Gauteng: 526 wards in 9 municipalities, grouped into 5 districts (Johannesburg, Tshwane, Ekurhuleni, Sedibeng, West Rand).
+
+| File | Built by | Source |
+|---|---|---|
+| `wards.geojson` | `python3 scripts/build_gauteng_wards.py <gpkg> public/data/wards.geojson` | `data/processed/wards_2026_gauteng.gpkg` on `main` |
+| `history.json` | `python3 scripts/build_gauteng_history.py <vd_history.csv> <crosswalk.csv> public/data/history.json` | past VD results on `main`, moved onto 2026 wards |
+| `results.json` | `npm run fetch:results` | the IEC results dashboard feed (ward ballot) |
+| `predictions.json` | not yet: empty until the model's live projection is exported | |
+
+The Pages workflow fetches a fresh IEC count on every deploy and every 10 minutes. Scheduled runs only fire from the repo's default branch. With no forecast loaded, the map opens on **Current result**.
+
 ## Stack
 
 [Vite](https://vite.dev) + React + TypeScript, styled with [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) components (Card, Badge, Button, Select, Tabs, Table, Toggle Group, Tooltip, Chart). Charts use shadcn's Recharts-based `Chart`.

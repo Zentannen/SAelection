@@ -74,7 +74,10 @@ function MapLegend({ by }: { by: ColourBy }) {
 
 export default function App() {
   const { state, summaries, overall, districts, elections } = useElectionData()
-  const [colourBy, setColourBy] = useState<ColourBy>("prediction")
+  // Until the viewer picks, colour by the forecast, or by the count when there is no forecast yet.
+  const [colourByChoice, setColourBy] = useState<ColourBy | null>(null)
+  const hasPredictions = "predictions" in state && Object.keys(state.predictions.wards).length > 0
+  const colourBy: ColourBy = colourByChoice ?? (hasPredictions ? "prediction" : "result")
   const [district, setDistrict] = useState<string | null>(null)
   const [hoverDistrict, setHoverDistrict] = useState<string | null>(null)
   const [selectedWardId, setSelectedWardId] = useState<string | null>(null)
@@ -90,7 +93,7 @@ export default function App() {
 
   // One block order for every segmented bar and line chart: overall forecast, largest first, "Other" last.
   const order = useMemo(() => {
-    const keys = ranked(bucketShares(overall.predictedShares)).map(([p]) => p).filter((p) => p !== OTHER)
+    const keys = ranked(bucketShares(Object.keys(overall.predictedShares).length ? overall.predictedShares : overall.countedShares)).map(([p]) => p).filter((p) => p !== OTHER)
     return [...keys, OTHER]
   }, [overall])
 

@@ -9,7 +9,7 @@ export const PARTIES: Record<string, { name: string; color?: string; ink?: strin
   MK: { name: "uMkhonto weSizwe", color: "var(--party-mk)", ink: "#ffffff" },
   IFP: { name: "Inkatha Freedom Party", color: "var(--party-ifp)", ink: "#0b0b0b" },
   PA: { name: "Patriotic Alliance" },
-  ActionSA: { name: "ActionSA" },
+  ActionSA: { name: "ActionSA", color: "var(--party-actionsa)", ink: "#ffffff" },
   "FF+": { name: "Freedom Front Plus" },
 }
 

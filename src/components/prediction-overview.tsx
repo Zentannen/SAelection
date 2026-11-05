@@ -85,7 +85,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
               <div className="flex items-baseline justify-between gap-4 text-sm desk:flex-col desk:items-start desk:gap-0.5">
                 <span className="font-medium">Predicted vote share</span>
                 <span className="text-xs text-muted-foreground">
-                  {scope.predictedSource === "model" ? "Model forecast" : `Built from ${int(scope.wardCount)} ward forecasts`}
+                  {scope.predictedSource === "model" ? "Model forecast" : Object.keys(scope.predictedShares).length ? `Built from ${int(scope.wardCount)} ward forecasts` : "No forecast loaded yet"}
                 </span>
               </div>
               <SegmentedBar shares={scope.predictedShares} order={order} />
