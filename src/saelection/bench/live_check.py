@@ -37,8 +37,16 @@ from ..features import K, build_design
 from .harness import OUT, REAL2026, Case, _counts, _fill, _shares, resolve
 
 
-def load_live_case(snapshot: str | None = None):
-    """Case for 2026 plus per-VD arrival snapshot index (-1 = not reported yet)."""
+def load_live_case(snapshot: str | None = None, augment: bool = False):
+    """Case for 2026 plus per-VD arrival snapshot index (-1 = not reported yet).
+
+    augment=True also adds the counted VDs that are not in the 2026 VD boundary set (new
+    stations) as extra rows after the n_base modelled VDs, so their result informs the
+    projection of their ward-mates. They have no history of their own: their past results are
+    the registered-weighted average shares of the boundary VDs in the same IEC ward (scaled to
+    their own electorate), their location is the mean of those ward-mates, and they have no
+    contiguity edges. Extra rows are always counted (arrival >= 0) and flagged in
+    case.design.extra_mask; live_check never holds them out for scoring."""
     d = build_design(None, "LGE2021", "PE2024", 2026, name="LIVE2026")
     hist = load_history()
     files = sorted(REAL2026.glob("IEC_LGE2026_GP_*.csv"))
@@ -46,6 +54,7 @@ def load_live_case(snapshot: str | None = None):
         files = [f for f in files if f.name <= snapshot]
     pos = {v: i for i, v in enumerate(d.vd)}
     iec_ward = {}
+    extra = {}                               # counted VDs outside the boundary set (augment)
     Y = np.zeros((d.n, len(CATS)))
     reg_obs = np.full(d.n, np.nan)
     arrival = np.full(d.n, -1)
@@ -55,6 +64,9 @@ def load_live_case(snapshot: str | None = None):
         for r in t.itertuples(index=False):
             i = pos.get(int(r.vd))
             if i is None:
+                extra.setdefault(int(r.vd), {"arrival": s})
+                extra[int(r.vd)].update(Y=[getattr(r, c) for c in CATS], reg=r.registered,
+                                        ward=int(r.ward), muni=r.muni)
                 continue
             Y[i] = [getattr(r, c) for c in CATS]
             reg_obs[i] = r.registered
@@ -76,7 +88,50 @@ def load_live_case(snapshot: str | None = None):
                 lon=nodes["lon"].to_numpy(), lat=nodes["lat"].to_numpy(), edges=d.edges, Y=Y,
                 registered=registered, prev_lge=_fill(lge, p1, d.edges), prev_pe=_fill(pe, p2, d.edges),
                 hist_present=p1 & p2, X1=d.X1, X2=d.X2, design=d)
+    if augment and extra:
+        case, arrival = _augment(case, arrival, extra)
     return case, arrival, [f.name for f in files]
+
+
+def _augment(case: Case, arrival, extra: dict):
+    from ..features import SMOOTH
+    keep = []
+    rows = {k: [] for k in ("vd", "muni", "ward", "lon", "lat", "Y", "reg", "lge", "pe", "arr")}
+    for v, e in sorted(extra.items()):
+        mates = np.where(case.ward == e["ward"])[0]
+        if not len(mates) or e["muni"] not in case.muni_codes:
+            continue
+        reg = float(max(e["reg"], sum(e["Y"])))
+        for key, src in (("lge", case.prev_lge), ("pe", case.prev_pe)):
+            sh = src[mates].sum(0) / max(src[mates].sum(), 1)
+            rows[key].append(sh * reg)
+        rows["vd"].append(v); rows["muni"].append(case.muni_codes.index(e["muni"])); rows["ward"].append(e["ward"])
+        rows["lon"].append(np.nanmean(case.lon[mates])); rows["lat"].append(np.nanmean(case.lat[mates]))
+        rows["Y"].append(e["Y"]); rows["reg"].append(reg); rows["arr"].append(e["arrival"])
+    if not rows["vd"]:
+        return case, arrival
+    m = len(rows["vd"])
+    lge, pe = np.array(rows["lge"]), np.array(rows["pe"])
+    d = case.design
+
+    def alr_c(c, centre):
+        c = c + SMOOTH
+        x = np.log(c[:, :K]) - np.log(c[:, [K]])
+        return np.where(d.has_history, x - centre, 0.0)
+
+    import dataclasses
+    d2 = dataclasses.replace(d)
+    d2.extra_mask = np.r_[np.zeros(case.n, bool), np.ones(m, bool)]
+    case2 = Case(name=case.name, vd=np.r_[case.vd, rows["vd"]].astype(np.int64),
+                 muni=np.r_[case.muni, rows["muni"]].astype(int), muni_codes=case.muni_codes,
+                 ward=np.r_[case.ward, rows["ward"]].astype(np.int64),
+                 lon=np.r_[case.lon, rows["lon"]], lat=np.r_[case.lat, rows["lat"]], edges=case.edges,
+                 Y=np.vstack([case.Y, rows["Y"]]), registered=np.r_[case.registered, rows["reg"]],
+                 prev_lge=np.vstack([case.prev_lge, lge]), prev_pe=np.vstack([case.prev_pe, pe]),
+                 hist_present=np.r_[case.hist_present, np.zeros(m, bool)],
+                 X1=np.vstack([case.X1, alr_c(lge, d.centres["X1"])]), X2=np.vstack([case.X2, alr_c(pe, d.centres["X2"])]),
+                 design=d2)
+    return case2, np.r_[arrival, rows["arr"]]
 
 
 def vd_wards(vds: np.ndarray) -> np.ndarray:
@@ -99,6 +154,9 @@ def area_type(case: Case) -> np.ndarray:
 
 def tasks(case: Case, arrival: np.ndarray, min_group=12, n_random=3):
     rep = arrival >= 0
+    xm = getattr(case.design, "extra_mask", None)
+    always = xm if xm is not None else np.zeros(case.n, bool)   # augmented rows: always counted
+    rep_all, rep = rep, rep & ~always
     out = {}
     if arrival.max() > 0:
         out["time"] = (arrival == 0, rep & (arrival > 0))
@@ -107,17 +165,17 @@ def tasks(case: Case, arrival: np.ndarray, min_group=12, n_random=3):
         for m, code in enumerate(case.muni_codes):
             g = rep & (at == t) & (case.muni == m)
             if g.sum() >= min_group and (rep & ~g).sum() >= 50:
-                out[f"group:{t}:{code}"] = (rep & ~g, g)
+                out[f"group:{t}:{code}"] = ((rep & ~g) | always, g)
     for m, code in enumerate(case.muni_codes):
         g = rep & (case.muni == m)
         if g.sum() >= min_group:
-            out[f"muni:{code}"] = (rep & ~g, g)
+            out[f"muni:{code}"] = ((rep & ~g) | always, g)
     idx = np.where(rep)[0]
     for s in range(n_random):
         hide = np.random.default_rng(500 + s).choice(idx, size=int(0.2 * len(idx)), replace=False)
         g = np.zeros(case.n, bool)
         g[hide] = True
-        out[f"random_s{s}"] = (rep & ~g, g)
+        out[f"random_s{s}"] = ((rep & ~g) | always, g)
     return out
 
 
@@ -143,8 +201,8 @@ def score_holdout(case: Case, counted: np.ndarray, held: np.ndarray, proj) -> di
     return {k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else v) for k, v in r.items()}
 
 
-def run(methods, tag=None, snapshot=None, only=None):
-    case, arrival, files = load_live_case(snapshot)
+def run(methods, tag=None, snapshot=None, only=None, augment=False):
+    case, arrival, files = load_live_case(snapshot, augment=augment)
     print(f"LIVE2026 from {files[-1]} ({len(files)} snapshots): {int((arrival >= 0).sum())} counted VDs in the model's VD set", flush=True)
     rows = []
     for tname, (counted, held) in tasks(case, arrival).items():
@@ -181,6 +239,7 @@ if __name__ == "__main__":
     ap.add_argument("--tag", default=None)
     ap.add_argument("--snapshot", default=None, help="use snapshots up to this file name")
     ap.add_argument("--only", default="", help="comma list of task prefixes, e.g. group,time")
+    ap.add_argument("--augment", action="store_true", help="add counted VDs outside the boundary set as observations")
     a = ap.parse_args()
-    df = run(a.methods.split(","), a.tag, a.snapshot, [o for o in a.only.split(",") if o])
+    df = run(a.methods.split(","), a.tag, a.snapshot, [o for o in a.only.split(",") if o], a.augment)
     print(summarise(df).to_string())

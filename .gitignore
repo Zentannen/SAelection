@@ -16,3 +16,5 @@ artifacts/*.log
 !.env.example
 *.pem
 kaggle.json
+output/live/
+output/live_*/
