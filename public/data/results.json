@@ -1,0 +1,1579 @@
+{
+ "sample": true,
+ "updated_at": "2026-11-05T10:27:47.508Z",
+ "source": "Synthetic sample data",
+ "wards": {
+  "SAMPLE001": {
+   "status": "counting",
+   "registered": 11181,
+   "votes": {
+    "ANC": 591,
+    "DA": 360,
+    "EFF": 33,
+    "MK": 288,
+    "IFP": 33,
+    "PA": 29,
+    "ActionSA": 15,
+    "FF+": 44
+   }
+  },
+  "SAMPLE002": {
+   "status": "counting",
+   "registered": 12641,
+   "votes": {
+    "ANC": 980,
+    "DA": 541,
+    "EFF": 341,
+    "MK": 197,
+    "IFP": 55,
+    "PA": 186,
+    "ActionSA": 44,
+    "FF+": 398
+   }
+  },
+  "SAMPLE003": {
+   "status": "counting",
+   "registered": 11984,
+   "votes": {
+    "ANC": 1265,
+    "DA": 284,
+    "EFF": 927,
+    "MK": 52,
+    "IFP": 29,
+    "PA": 74,
+    "ActionSA": 35,
+    "FF+": 46
+   }
+  },
+  "SAMPLE004": {
+   "status": "final",
+   "registered": 10668,
+   "votes": {
+    "ANC": 916,
+    "DA": 1803,
+    "EFF": 1137,
+    "MK": 1342,
+    "IFP": 358,
+    "PA": 107,
+    "ActionSA": 133,
+    "FF+": 138
+   }
+  },
+  "SAMPLE005": {
+   "status": "counting",
+   "registered": 12861,
+   "votes": {
+    "ANC": 97,
+    "DA": 339,
+    "EFF": 546,
+    "MK": 149,
+    "IFP": 77,
+    "PA": 110,
+    "ActionSA": 177,
+    "FF+": 310
+   }
+  },
+  "SAMPLE006": {
+   "status": "final",
+   "registered": 12352,
+   "votes": {
+    "ANC": 2356,
+    "DA": 1916,
+    "EFF": 226,
+    "MK": 168,
+    "IFP": 95,
+    "PA": 209,
+    "ActionSA": 25,
+    "FF+": 319
+   }
+  },
+  "SAMPLE007": {
+   "status": "counting",
+   "registered": 9596,
+   "votes": {
+    "ANC": 495,
+    "DA": 393,
+    "EFF": 117,
+    "MK": 588,
+    "IFP": 116,
+    "PA": 120,
+    "ActionSA": 54,
+    "FF+": 123
+   }
+  },
+  "SAMPLE008": {
+   "status": "not_started",
+   "registered": 13345,
+   "votes": {}
+  },
+  "SAMPLE009": {
+   "status": "not_started",
+   "registered": 7663,
+   "votes": {}
+  },
+  "SAMPLE010": {
+   "status": "final",
+   "registered": 6668,
+   "votes": {
+    "ANC": 104,
+    "DA": 487,
+    "EFF": 1092,
+    "MK": 96,
+    "IFP": 95,
+    "PA": 261,
+    "ActionSA": 511,
+    "FF+": 113
+   }
+  },
+  "SAMPLE011": {
+   "status": "counting",
+   "registered": 13991,
+   "votes": {
+    "ANC": 1274,
+    "DA": 763,
+    "EFF": 156,
+    "MK": 3418,
+    "IFP": 147,
+    "PA": 182,
+    "ActionSA": 287,
+    "FF+": 581
+   }
+  },
+  "SAMPLE012": {
+   "status": "final",
+   "registered": 12368,
+   "votes": {
+    "ANC": 452,
+    "DA": 390,
+    "EFF": 256,
+    "MK": 3475,
+    "IFP": 207,
+    "PA": 216,
+    "ActionSA": 191,
+    "FF+": 238
+   }
+  },
+  "SAMPLE013": {
+   "status": "final",
+   "registered": 12904,
+   "votes": {
+    "ANC": 686,
+    "DA": 958,
+    "EFF": 641,
+    "MK": 2146,
+    "IFP": 327,
+    "PA": 409,
+    "ActionSA": 263,
+    "FF+": 366
+   }
+  },
+  "SAMPLE014": {
+   "status": "counting",
+   "registered": 8475,
+   "votes": {
+    "ANC": 170,
+    "DA": 743,
+    "EFF": 173,
+    "MK": 1124,
+    "IFP": 74,
+    "PA": 50,
+    "ActionSA": 43,
+    "FF+": 69
+   }
+  },
+  "SAMPLE015": {
+   "status": "counting",
+   "registered": 11064,
+   "votes": {
+    "ANC": 29,
+    "DA": 137,
+    "EFF": 121,
+    "MK": 589,
+    "IFP": 78,
+    "PA": 14,
+    "ActionSA": 11,
+    "FF+": 16
+   }
+  },
+  "SAMPLE016": {
+   "status": "final",
+   "registered": 10201,
+   "votes": {
+    "ANC": 1446,
+    "DA": 1560,
+    "EFF": 179,
+    "MK": 496,
+    "IFP": 132,
+    "PA": 361,
+    "ActionSA": 91,
+    "FF+": 804
+   }
+  },
+  "SAMPLE017": {
+   "status": "final",
+   "registered": 7031,
+   "votes": {
+    "ANC": 1786,
+    "DA": 1326,
+    "EFF": 114,
+    "MK": 625,
+    "IFP": 42,
+    "PA": 33,
+    "ActionSA": 53,
+    "FF+": 146
+   }
+  },
+  "SAMPLE018": {
+   "status": "counting",
+   "registered": 8905,
+   "votes": {
+    "ANC": 52,
+    "DA": 817,
+    "EFF": 161,
+    "MK": 437,
+    "IFP": 314,
+    "PA": 144,
+    "ActionSA": 254,
+    "FF+": 244
+   }
+  },
+  "SAMPLE019": {
+   "status": "final",
+   "registered": 12858,
+   "votes": {
+    "ANC": 841,
+    "DA": 538,
+    "EFF": 494,
+    "MK": 2219,
+    "IFP": 148,
+    "PA": 144,
+    "ActionSA": 136,
+    "FF+": 310
+   }
+  },
+  "SAMPLE020": {
+   "status": "counting",
+   "registered": 12184,
+   "votes": {
+    "ANC": 541,
+    "DA": 435,
+    "EFF": 177,
+    "MK": 890,
+    "IFP": 25,
+    "PA": 197,
+    "ActionSA": 102,
+    "FF+": 669
+   }
+  },
+  "SAMPLE021": {
+   "status": "counting",
+   "registered": 10725,
+   "votes": {
+    "ANC": 1330,
+    "DA": 1037,
+    "EFF": 177,
+    "MK": 1044,
+    "IFP": 62,
+    "PA": 33,
+    "ActionSA": 14,
+    "FF+": 98
+   }
+  },
+  "SAMPLE022": {
+   "status": "counting",
+   "registered": 7801,
+   "votes": {
+    "ANC": 497,
+    "DA": 903,
+    "EFF": 250,
+    "MK": 48,
+    "IFP": 18,
+    "PA": 54,
+    "ActionSA": 34,
+    "FF+": 98
+   }
+  },
+  "SAMPLE023": {
+   "status": "final",
+   "registered": 10906,
+   "votes": {
+    "ANC": 3082,
+    "DA": 74,
+    "EFF": 384,
+    "MK": 83,
+    "IFP": 91,
+    "PA": 74,
+    "ActionSA": 53,
+    "FF+": 54
+   }
+  },
+  "SAMPLE024": {
+   "status": "counting",
+   "registered": 12729,
+   "votes": {
+    "ANC": 165,
+    "DA": 213,
+    "EFF": 49,
+    "MK": 570,
+    "IFP": 54,
+    "PA": 83,
+    "ActionSA": 24,
+    "FF+": 74
+   }
+  },
+  "SAMPLE025": {
+   "status": "counting",
+   "registered": 13120,
+   "votes": {
+    "ANC": 571,
+    "DA": 407,
+    "EFF": 135,
+    "MK": 805,
+    "IFP": 174,
+    "PA": 37,
+    "ActionSA": 58,
+    "FF+": 72
+   }
+  },
+  "SAMPLE026": {
+   "status": "counting",
+   "registered": 12490,
+   "votes": {
+    "ANC": 1013,
+    "DA": 583,
+    "EFF": 54,
+    "MK": 973,
+    "IFP": 36,
+    "PA": 47,
+    "ActionSA": 16,
+    "FF+": 183
+   }
+  },
+  "SAMPLE027": {
+   "status": "final",
+   "registered": 12721,
+   "votes": {
+    "ANC": 614,
+    "DA": 1330,
+    "EFF": 547,
+    "MK": 1259,
+    "IFP": 394,
+    "PA": 159,
+    "ActionSA": 451,
+    "FF+": 174
+   }
+  },
+  "SAMPLE028": {
+   "status": "final",
+   "registered": 8872,
+   "votes": {
+    "ANC": 270,
+    "DA": 327,
+    "EFF": 1650,
+    "MK": 541,
+    "IFP": 287,
+    "PA": 218,
+    "ActionSA": 666,
+    "FF+": 276
+   }
+  },
+  "SAMPLE029": {
+   "status": "counting",
+   "registered": 12410,
+   "votes": {
+    "ANC": 890,
+    "DA": 702,
+    "EFF": 117,
+    "MK": 805,
+    "IFP": 115,
+    "PA": 98,
+    "ActionSA": 78,
+    "FF+": 267
+   }
+  },
+  "SAMPLE030": {
+   "status": "counting",
+   "registered": 11450,
+   "votes": {
+    "ANC": 966,
+    "DA": 431,
+    "EFF": 174,
+    "MK": 1416,
+    "IFP": 68,
+    "PA": 74,
+    "ActionSA": 68,
+    "FF+": 108
+   }
+  },
+  "SAMPLE031": {
+   "status": "final",
+   "registered": 6009,
+   "votes": {
+    "ANC": 234,
+    "DA": 86,
+    "EFF": 1225,
+    "MK": 328,
+    "IFP": 138,
+    "PA": 156,
+    "ActionSA": 1060,
+    "FF+": 304
+   }
+  },
+  "SAMPLE032": {
+   "status": "final",
+   "registered": 9979,
+   "votes": {
+    "ANC": 1230,
+    "DA": 638,
+    "EFF": 96,
+    "MK": 1105,
+    "IFP": 36,
+    "PA": 153,
+    "ActionSA": 31,
+    "FF+": 322
+   }
+  },
+  "SAMPLE033": {
+   "status": "not_started",
+   "registered": 11791,
+   "votes": {}
+  },
+  "SAMPLE034": {
+   "status": "counting",
+   "registered": 9538,
+   "votes": {
+    "ANC": 75,
+    "DA": 150,
+    "EFF": 1074,
+    "MK": 170,
+    "IFP": 88,
+    "PA": 119,
+    "ActionSA": 788,
+    "FF+": 213
+   }
+  },
+  "SAMPLE035": {
+   "status": "counting",
+   "registered": 7605,
+   "votes": {
+    "ANC": 360,
+    "DA": 262,
+    "EFF": 17,
+    "MK": 418,
+    "IFP": 28,
+    "PA": 27,
+    "ActionSA": 29,
+    "FF+": 32
+   }
+  },
+  "SAMPLE036": {
+   "status": "final",
+   "registered": 13782,
+   "votes": {
+    "ANC": 914,
+    "DA": 746,
+    "EFF": 536,
+    "MK": 1642,
+    "IFP": 455,
+    "PA": 569,
+    "ActionSA": 369,
+    "FF+": 525
+   }
+  },
+  "SAMPLE037": {
+   "status": "not_started",
+   "registered": 7787,
+   "votes": {}
+  },
+  "SAMPLE038": {
+   "status": "counting",
+   "registered": 8168,
+   "votes": {
+    "ANC": 428,
+    "DA": 471,
+    "EFF": 81,
+    "MK": 817,
+    "IFP": 73,
+    "PA": 38,
+    "ActionSA": 24,
+    "FF+": 36
+   }
+  },
+  "SAMPLE039": {
+   "status": "counting",
+   "registered": 7158,
+   "votes": {
+    "ANC": 119,
+    "DA": 501,
+    "EFF": 370,
+    "MK": 124,
+    "IFP": 23,
+    "PA": 189,
+    "ActionSA": 132,
+    "FF+": 105
+   }
+  },
+  "SAMPLE040": {
+   "status": "counting",
+   "registered": 6398,
+   "votes": {
+    "ANC": 310,
+    "DA": 431,
+    "EFF": 41,
+    "MK": 515,
+    "IFP": 43,
+    "PA": 57,
+    "ActionSA": 63,
+    "FF+": 50
+   }
+  },
+  "SAMPLE041": {
+   "status": "final",
+   "registered": 10095,
+   "votes": {
+    "ANC": 461,
+    "DA": 783,
+    "EFF": 1515,
+    "MK": 233,
+    "IFP": 97,
+    "PA": 860,
+    "ActionSA": 655,
+    "FF+": 637
+   }
+  },
+  "SAMPLE042": {
+   "status": "counting",
+   "registered": 13156,
+   "votes": {
+    "ANC": 799,
+    "DA": 350,
+    "EFF": 61,
+    "MK": 252,
+    "IFP": 44,
+    "PA": 79,
+    "ActionSA": 24,
+    "FF+": 255
+   }
+  },
+  "SAMPLE043": {
+   "status": "final",
+   "registered": 6526,
+   "votes": {
+    "ANC": 1128,
+    "DA": 744,
+    "EFF": 1482,
+    "MK": 21,
+    "IFP": 40,
+    "PA": 59,
+    "ActionSA": 59,
+    "FF+": 137
+   }
+  },
+  "SAMPLE044": {
+   "status": "not_started",
+   "registered": 8439,
+   "votes": {}
+  },
+  "SAMPLE045": {
+   "status": "final",
+   "registered": 7014,
+   "votes": {
+    "ANC": 1705,
+    "DA": 309,
+    "EFF": 311,
+    "MK": 89,
+    "IFP": 27,
+    "PA": 59,
+    "ActionSA": 42,
+    "FF+": 68
+   }
+  },
+  "SAMPLE046": {
+   "status": "counting",
+   "registered": 12577,
+   "votes": {
+    "ANC": 2722,
+    "DA": 390,
+    "EFF": 560,
+    "MK": 66,
+    "IFP": 104,
+    "PA": 101,
+    "ActionSA": 51,
+    "FF+": 69
+   }
+  },
+  "SAMPLE047": {
+   "status": "counting",
+   "registered": 11514,
+   "votes": {
+    "ANC": 79,
+    "DA": 62,
+    "EFF": 637,
+    "MK": 102,
+    "IFP": 77,
+    "PA": 51,
+    "ActionSA": 594,
+    "FF+": 103
+   }
+  },
+  "SAMPLE048": {
+   "status": "final",
+   "registered": 11268,
+   "votes": {
+    "ANC": 158,
+    "DA": 939,
+    "EFF": 2127,
+    "MK": 2344,
+    "IFP": 538,
+    "PA": 182,
+    "ActionSA": 263,
+    "FF+": 202
+   }
+  },
+  "SAMPLE049": {
+   "status": "not_started",
+   "registered": 8297,
+   "votes": {}
+  },
+  "SAMPLE050": {
+   "status": "counting",
+   "registered": 12242,
+   "votes": {
+    "ANC": 275,
+    "DA": 109,
+    "EFF": 108,
+    "MK": 510,
+    "IFP": 25,
+    "PA": 51,
+    "ActionSA": 30,
+    "FF+": 135
+   }
+  },
+  "SAMPLE051": {
+   "status": "counting",
+   "registered": 14818,
+   "votes": {
+    "ANC": 1251,
+    "DA": 2245,
+    "EFF": 415,
+    "MK": 318,
+    "IFP": 62,
+    "PA": 250,
+    "ActionSA": 53,
+    "FF+": 586
+   }
+  },
+  "SAMPLE052": {
+   "status": "counting",
+   "registered": 10539,
+   "votes": {
+    "ANC": 408,
+    "DA": 818,
+    "EFF": 45,
+    "MK": 938,
+    "IFP": 23,
+    "PA": 37,
+    "ActionSA": 32,
+    "FF+": 29
+   }
+  },
+  "SAMPLE053": {
+   "status": "final",
+   "registered": 8574,
+   "votes": {
+    "ANC": 830,
+    "DA": 2003,
+    "EFF": 208,
+    "MK": 878,
+    "IFP": 53,
+    "PA": 89,
+    "ActionSA": 84,
+    "FF+": 102
+   }
+  },
+  "SAMPLE054": {
+   "status": "final",
+   "registered": 12140,
+   "votes": {
+    "ANC": 2257,
+    "DA": 2545,
+    "EFF": 733,
+    "MK": 1271,
+    "IFP": 150,
+    "PA": 48,
+    "ActionSA": 97,
+    "FF+": 170
+   }
+  },
+  "SAMPLE055": {
+   "status": "not_started",
+   "registered": 14598,
+   "votes": {}
+  },
+  "SAMPLE056": {
+   "status": "final",
+   "registered": 13694,
+   "votes": {
+    "ANC": 750,
+    "DA": 439,
+    "EFF": 506,
+    "MK": 2881,
+    "IFP": 149,
+    "PA": 325,
+    "ActionSA": 108,
+    "FF+": 838
+   }
+  },
+  "SAMPLE057": {
+   "status": "final",
+   "registered": 11307,
+   "votes": {
+    "ANC": 2598,
+    "DA": 933,
+    "EFF": 2314,
+    "MK": 176,
+    "IFP": 150,
+    "PA": 111,
+    "ActionSA": 125,
+    "FF+": 156
+   }
+  },
+  "SAMPLE058": {
+   "status": "final",
+   "registered": 10631,
+   "votes": {
+    "ANC": 399,
+    "DA": 1685,
+    "EFF": 165,
+    "MK": 1780,
+    "IFP": 191,
+    "PA": 83,
+    "ActionSA": 196,
+    "FF+": 148
+   }
+  },
+  "SAMPLE059": {
+   "status": "counting",
+   "registered": 12600,
+   "votes": {
+    "ANC": 697,
+    "DA": 1051,
+    "EFF": 280,
+    "MK": 487,
+    "IFP": 61,
+    "PA": 49,
+    "ActionSA": 30,
+    "FF+": 120
+   }
+  },
+  "SAMPLE060": {
+   "status": "final",
+   "registered": 9971,
+   "votes": {
+    "ANC": 326,
+    "DA": 113,
+    "EFF": 1663,
+    "MK": 866,
+    "IFP": 124,
+    "PA": 194,
+    "ActionSA": 364,
+    "FF+": 436
+   }
+  },
+  "SAMPLE061": {
+   "status": "final",
+   "registered": 11947,
+   "votes": {
+    "ANC": 1795,
+    "DA": 2452,
+    "EFF": 373,
+    "MK": 273,
+    "IFP": 78,
+    "PA": 480,
+    "ActionSA": 97,
+    "FF+": 850
+   }
+  },
+  "SAMPLE062": {
+   "status": "counting",
+   "registered": 6303,
+   "votes": {
+    "ANC": 85,
+    "DA": 73,
+    "EFF": 113,
+    "MK": 186,
+    "IFP": 26,
+    "PA": 34,
+    "ActionSA": 18,
+    "FF+": 71
+   }
+  },
+  "SAMPLE063": {
+   "status": "final",
+   "registered": 12036,
+   "votes": {
+    "ANC": 365,
+    "DA": 252,
+    "EFF": 2175,
+    "MK": 774,
+    "IFP": 305,
+    "PA": 199,
+    "ActionSA": 279,
+    "FF+": 268
+   }
+  },
+  "SAMPLE064": {
+   "status": "counting",
+   "registered": 13714,
+   "votes": {
+    "ANC": 1541,
+    "DA": 536,
+    "EFF": 40,
+    "MK": 477,
+    "IFP": 30,
+    "PA": 123,
+    "ActionSA": 31,
+    "FF+": 416
+   }
+  },
+  "SAMPLE065": {
+   "status": "final",
+   "registered": 8995,
+   "votes": {
+    "ANC": 870,
+    "DA": 1499,
+    "EFF": 326,
+    "MK": 455,
+    "IFP": 100,
+    "PA": 233,
+    "ActionSA": 202,
+    "FF+": 484
+   }
+  },
+  "SAMPLE066": {
+   "status": "final",
+   "registered": 9971,
+   "votes": {
+    "ANC": 99,
+    "DA": 232,
+    "EFF": 2773,
+    "MK": 454,
+    "IFP": 130,
+    "PA": 143,
+    "ActionSA": 494,
+    "FF+": 254
+   }
+  },
+  "SAMPLE067": {
+   "status": "counting",
+   "registered": 12779,
+   "votes": {
+    "ANC": 202,
+    "DA": 170,
+    "EFF": 258,
+    "MK": 201,
+    "IFP": 31,
+    "PA": 50,
+    "ActionSA": 73,
+    "FF+": 105
+   }
+  },
+  "SAMPLE068": {
+   "status": "counting",
+   "registered": 13108,
+   "votes": {
+    "ANC": 603,
+    "DA": 865,
+    "EFF": 149,
+    "MK": 553,
+    "IFP": 50,
+    "PA": 43,
+    "ActionSA": 37,
+    "FF+": 47
+   }
+  },
+  "SAMPLE069": {
+   "status": "counting",
+   "registered": 8135,
+   "votes": {
+    "ANC": 333,
+    "DA": 402,
+    "EFF": 244,
+    "MK": 724,
+    "IFP": 39,
+    "PA": 166,
+    "ActionSA": 31,
+    "FF+": 503
+   }
+  },
+  "SAMPLE070": {
+   "status": "final",
+   "registered": 14462,
+   "votes": {
+    "ANC": 968,
+    "DA": 1628,
+    "EFF": 187,
+    "MK": 2121,
+    "IFP": 106,
+    "PA": 60,
+    "ActionSA": 39,
+    "FF+": 132
+   }
+  },
+  "SAMPLE071": {
+   "status": "counting",
+   "registered": 8245,
+   "votes": {
+    "ANC": 183,
+    "DA": 627,
+    "EFF": 92,
+    "MK": 396,
+    "IFP": 51,
+    "PA": 15,
+    "ActionSA": 16,
+    "FF+": 32
+   }
+  },
+  "SAMPLE072": {
+   "status": "counting",
+   "registered": 8424,
+   "votes": {
+    "ANC": 269,
+    "DA": 259,
+    "EFF": 36,
+    "MK": 124,
+    "IFP": 10,
+    "PA": 12,
+    "ActionSA": 3,
+    "FF+": 17
+   }
+  },
+  "SAMPLE073": {
+   "status": "final",
+   "registered": 14132,
+   "votes": {
+    "ANC": 1245,
+    "DA": 953,
+    "EFF": 565,
+    "MK": 3576,
+    "IFP": 246,
+    "PA": 220,
+    "ActionSA": 90,
+    "FF+": 303
+   }
+  },
+  "SAMPLE074": {
+   "status": "final",
+   "registered": 6283,
+   "votes": {
+    "ANC": 514,
+    "DA": 1042,
+    "EFF": 261,
+    "MK": 70,
+    "IFP": 20,
+    "PA": 97,
+    "ActionSA": 14,
+    "FF+": 187
+   }
+  },
+  "SAMPLE075": {
+   "status": "final",
+   "registered": 9792,
+   "votes": {
+    "ANC": 396,
+    "DA": 540,
+    "EFF": 1894,
+    "MK": 360,
+    "IFP": 475,
+    "PA": 373,
+    "ActionSA": 1222,
+    "FF+": 265
+   }
+  },
+  "SAMPLE076": {
+   "status": "counting",
+   "registered": 8561,
+   "votes": {
+    "ANC": 439,
+    "DA": 486,
+    "EFF": 161,
+    "MK": 954,
+    "IFP": 175,
+    "PA": 163,
+    "ActionSA": 207,
+    "FF+": 185
+   }
+  },
+  "SAMPLE077": {
+   "status": "not_started",
+   "registered": 12235,
+   "votes": {}
+  },
+  "SAMPLE078": {
+   "status": "counting",
+   "registered": 10931,
+   "votes": {
+    "ANC": 38,
+    "DA": 54,
+    "EFF": 215,
+    "MK": 35,
+    "IFP": 18,
+    "PA": 31,
+    "ActionSA": 246,
+    "FF+": 40
+   }
+  },
+  "SAMPLE079": {
+   "status": "final",
+   "registered": 6309,
+   "votes": {
+    "ANC": 434,
+    "DA": 518,
+    "EFF": 127,
+    "MK": 876,
+    "IFP": 155,
+    "PA": 87,
+    "ActionSA": 106,
+    "FF+": 80
+   }
+  },
+  "SAMPLE080": {
+   "status": "counting",
+   "registered": 8387,
+   "votes": {
+    "ANC": 287,
+    "DA": 193,
+    "EFF": 82,
+    "MK": 604,
+    "IFP": 99,
+    "PA": 52,
+    "ActionSA": 111,
+    "FF+": 109
+   }
+  },
+  "SAMPLE081": {
+   "status": "not_started",
+   "registered": 7154,
+   "votes": {}
+  },
+  "SAMPLE082": {
+   "status": "final",
+   "registered": 7767,
+   "votes": {
+    "ANC": 750,
+    "DA": 1512,
+    "EFF": 614,
+    "MK": 371,
+    "IFP": 66,
+    "PA": 344,
+    "ActionSA": 146,
+    "FF+": 542
+   }
+  },
+  "SAMPLE083": {
+   "status": "final",
+   "registered": 12408,
+   "votes": {
+    "ANC": 693,
+    "DA": 851,
+    "EFF": 1449,
+    "MK": 1308,
+    "IFP": 105,
+    "PA": 526,
+    "ActionSA": 114,
+    "FF+": 1161
+   }
+  },
+  "SAMPLE084": {
+   "status": "counting",
+   "registered": 7592,
+   "votes": {
+    "ANC": 231,
+    "DA": 97,
+    "EFF": 7,
+    "MK": 149,
+    "IFP": 7,
+    "PA": 6,
+    "ActionSA": 6,
+    "FF+": 17
+   }
+  },
+  "SAMPLE085": {
+   "status": "counting",
+   "registered": 6255,
+   "votes": {
+    "ANC": 561,
+    "DA": 840,
+    "EFF": 47,
+    "MK": 82,
+    "IFP": 35,
+    "PA": 14,
+    "ActionSA": 27,
+    "FF+": 62
+   }
+  },
+  "SAMPLE086": {
+   "status": "counting",
+   "registered": 13726,
+   "votes": {
+    "ANC": 1036,
+    "DA": 1148,
+    "EFF": 88,
+    "MK": 801,
+    "IFP": 85,
+    "PA": 104,
+    "ActionSA": 31,
+    "FF+": 280
+   }
+  },
+  "SAMPLE087": {
+   "status": "counting",
+   "registered": 9899,
+   "votes": {
+    "ANC": 522,
+    "DA": 714,
+    "EFF": 54,
+    "MK": 383,
+    "IFP": 44,
+    "PA": 19,
+    "ActionSA": 25,
+    "FF+": 18
+   }
+  },
+  "SAMPLE088": {
+   "status": "counting",
+   "registered": 14782,
+   "votes": {
+    "ANC": 107,
+    "DA": 223,
+    "EFF": 293,
+    "MK": 75,
+    "IFP": 74,
+    "PA": 107,
+    "ActionSA": 870,
+    "FF+": 113
+   }
+  },
+  "SAMPLE089": {
+   "status": "final",
+   "registered": 14504,
+   "votes": {
+    "ANC": 1320,
+    "DA": 1841,
+    "EFF": 189,
+    "MK": 1639,
+    "IFP": 95,
+    "PA": 459,
+    "ActionSA": 149,
+    "FF+": 852
+   }
+  },
+  "SAMPLE090": {
+   "status": "final",
+   "registered": 9940,
+   "votes": {
+    "ANC": 1076,
+    "DA": 855,
+    "EFF": 609,
+    "MK": 1076,
+    "IFP": 215,
+    "PA": 215,
+    "ActionSA": 125,
+    "FF+": 540
+   }
+  },
+  "SAMPLE091": {
+   "status": "counting",
+   "registered": 14497,
+   "votes": {
+    "ANC": 98,
+    "DA": 360,
+    "EFF": 402,
+    "MK": 401,
+    "IFP": 104,
+    "PA": 45,
+    "ActionSA": 32,
+    "FF+": 50
+   }
+  },
+  "SAMPLE092": {
+   "status": "counting",
+   "registered": 10946,
+   "votes": {
+    "ANC": 1514,
+    "DA": 265,
+    "EFF": 1574,
+    "MK": 131,
+    "IFP": 128,
+    "PA": 229,
+    "ActionSA": 229,
+    "FF+": 195
+   }
+  },
+  "SAMPLE093": {
+   "status": "counting",
+   "registered": 10893,
+   "votes": {
+    "ANC": 703,
+    "DA": 809,
+    "EFF": 45,
+    "MK": 283,
+    "IFP": 8,
+    "PA": 71,
+    "ActionSA": 19,
+    "FF+": 184
+   }
+  },
+  "SAMPLE094": {
+   "status": "final",
+   "registered": 6169,
+   "votes": {
+    "ANC": 611,
+    "DA": 724,
+    "EFF": 280,
+    "MK": 395,
+    "IFP": 210,
+    "PA": 225,
+    "ActionSA": 143,
+    "FF+": 88
+   }
+  },
+  "SAMPLE095": {
+   "status": "counting",
+   "registered": 14697,
+   "votes": {
+    "ANC": 545,
+    "DA": 330,
+    "EFF": 2110,
+    "MK": 1642,
+    "IFP": 282,
+    "PA": 144,
+    "ActionSA": 273,
+    "FF+": 363
+   }
+  },
+  "SAMPLE096": {
+   "status": "counting",
+   "registered": 9216,
+   "votes": {
+    "ANC": 355,
+    "DA": 785,
+    "EFF": 826,
+    "MK": 167,
+    "IFP": 26,
+    "PA": 200,
+    "ActionSA": 178,
+    "FF+": 355
+   }
+  },
+  "SAMPLE097": {
+   "status": "counting",
+   "registered": 10731,
+   "votes": {
+    "ANC": 155,
+    "DA": 322,
+    "EFF": 46,
+    "MK": 604,
+    "IFP": 29,
+    "PA": 19,
+    "ActionSA": 36,
+    "FF+": 29
+   }
+  },
+  "SAMPLE098": {
+   "status": "not_started",
+   "registered": 11381,
+   "votes": {}
+  },
+  "SAMPLE099": {
+   "status": "not_started",
+   "registered": 7541,
+   "votes": {}
+  },
+  "SAMPLE100": {
+   "status": "final",
+   "registered": 10267,
+   "votes": {
+    "ANC": 294,
+    "DA": 1319,
+    "EFF": 652,
+    "MK": 446,
+    "IFP": 741,
+    "PA": 42,
+    "ActionSA": 74,
+    "FF+": 61
+   }
+  },
+  "SAMPLE101": {
+   "status": "counting",
+   "registered": 8192,
+   "votes": {
+    "ANC": 106,
+    "DA": 211,
+    "EFF": 1637,
+    "MK": 152,
+    "IFP": 77,
+    "PA": 221,
+    "ActionSA": 1160,
+    "FF+": 205
+   }
+  },
+  "SAMPLE102": {
+   "status": "counting",
+   "registered": 6256,
+   "votes": {
+    "ANC": 865,
+    "DA": 105,
+    "EFF": 221,
+    "MK": 17,
+    "IFP": 18,
+    "PA": 17,
+    "ActionSA": 21,
+    "FF+": 15
+   }
+  },
+  "SAMPLE103": {
+   "status": "counting",
+   "registered": 8705,
+   "votes": {
+    "ANC": 493,
+    "DA": 1096,
+    "EFF": 845,
+    "MK": 617,
+    "IFP": 272,
+    "PA": 46,
+    "ActionSA": 63,
+    "FF+": 53
+   }
+  },
+  "SAMPLE104": {
+   "status": "final",
+   "registered": 14290,
+   "votes": {
+    "ANC": 1880,
+    "DA": 2040,
+    "EFF": 198,
+    "MK": 1055,
+    "IFP": 152,
+    "PA": 143,
+    "ActionSA": 74,
+    "FF+": 322
+   }
+  },
+  "SAMPLE105": {
+   "status": "final",
+   "registered": 9106,
+   "votes": {
+    "ANC": 1137,
+    "DA": 1732,
+    "EFF": 69,
+    "MK": 1639,
+    "IFP": 74,
+    "PA": 38,
+    "ActionSA": 46,
+    "FF+": 53
+   }
+  },
+  "SAMPLE106": {
+   "status": "final",
+   "registered": 7042,
+   "votes": {
+    "ANC": 715,
+    "DA": 271,
+    "EFF": 1068,
+    "MK": 70,
+    "IFP": 83,
+    "PA": 120,
+    "ActionSA": 248,
+    "FF+": 128
+   }
+  },
+  "SAMPLE107": {
+   "status": "final",
+   "registered": 7632,
+   "votes": {
+    "ANC": 191,
+    "DA": 633,
+    "EFF": 1494,
+    "MK": 980,
+    "IFP": 514,
+    "PA": 84,
+    "ActionSA": 80,
+    "FF+": 94
+   }
+  },
+  "SAMPLE108": {
+   "status": "counting",
+   "registered": 12873,
+   "votes": {
+    "ANC": 920,
+    "DA": 855,
+    "EFF": 1613,
+    "MK": 152,
+    "IFP": 105,
+    "PA": 307,
+    "ActionSA": 379,
+    "FF+": 119
+   }
+  },
+  "SAMPLE109": {
+   "status": "final",
+   "registered": 6778,
+   "votes": {
+    "ANC": 921,
+    "DA": 1315,
+    "EFF": 67,
+    "MK": 1109,
+    "IFP": 53,
+    "PA": 52,
+    "ActionSA": 56,
+    "FF+": 105
+   }
+  },
+  "SAMPLE110": {
+   "status": "counting",
+   "registered": 11611,
+   "votes": {
+    "ANC": 332,
+    "DA": 805,
+    "EFF": 263,
+    "MK": 236,
+    "IFP": 52,
+    "PA": 153,
+    "ActionSA": 65,
+    "FF+": 441
+   }
+  },
+  "SAMPLE111": {
+   "status": "final",
+   "registered": 8324,
+   "votes": {
+    "ANC": 950,
+    "DA": 642,
+    "EFF": 1384,
+    "MK": 52,
+    "IFP": 208,
+    "PA": 588,
+    "ActionSA": 914,
+    "FF+": 224
+   }
+  },
+  "SAMPLE112": {
+   "status": "counting",
+   "registered": 8663,
+   "votes": {
+    "ANC": 169,
+    "DA": 166,
+    "EFF": 39,
+    "MK": 140,
+    "IFP": 10,
+    "PA": 63,
+    "ActionSA": 11,
+    "FF+": 82
+   }
+  },
+  "SAMPLE113": {
+   "status": "not_started",
+   "registered": 14721,
+   "votes": {}
+  },
+  "SAMPLE114": {
+   "status": "counting",
+   "registered": 10286,
+   "votes": {
+    "ANC": 139,
+    "DA": 326,
+    "EFF": 414,
+    "MK": 169,
+    "IFP": 28,
+    "PA": 152,
+    "ActionSA": 112,
+    "FF+": 171
+   }
+  },
+  "SAMPLE115": {
+   "status": "counting",
+   "registered": 6848,
+   "votes": {
+    "ANC": 58,
+    "DA": 452,
+    "EFF": 427,
+    "MK": 439,
+    "IFP": 213,
+    "PA": 23,
+    "ActionSA": 36,
+    "FF+": 34
+   }
+  },
+  "SAMPLE116": {
+   "status": "final",
+   "registered": 13226,
+   "votes": {
+    "ANC": 270,
+    "DA": 504,
+    "EFF": 1815,
+    "MK": 594,
+    "IFP": 215,
+    "PA": 782,
+    "ActionSA": 1490,
+    "FF+": 812
+   }
+  },
+  "SAMPLE117": {
+   "status": "final",
+   "registered": 8530,
+   "votes": {
+    "ANC": 347,
+    "DA": 1223,
+    "EFF": 1140,
+    "MK": 1212,
+    "IFP": 165,
+    "PA": 46,
+    "ActionSA": 58,
+    "FF+": 81
+   }
+  },
+  "SAMPLE118": {
+   "status": "counting",
+   "registered": 11588,
+   "votes": {
+    "ANC": 720,
+    "DA": 904,
+    "EFF": 89,
+    "MK": 684,
+    "IFP": 54,
+    "PA": 54,
+    "ActionSA": 38,
+    "FF+": 43
+   }
+  },
+  "SAMPLE119": {
+   "status": "counting",
+   "registered": 14117,
+   "votes": {
+    "ANC": 1875,
+    "DA": 1106,
+    "EFF": 672,
+    "MK": 95,
+    "IFP": 109,
+    "PA": 126,
+    "ActionSA": 69,
+    "FF+": 291
+   }
+  },
+  "SAMPLE120": {
+   "status": "final",
+   "registered": 12532,
+   "votes": {
+    "ANC": 337,
+    "DA": 187,
+    "EFF": 2111,
+    "MK": 176,
+    "IFP": 260,
+    "PA": 354,
+    "ActionSA": 818,
+    "FF+": 234
+   }
+  }
+ }
+}
