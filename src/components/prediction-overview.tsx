@@ -44,15 +44,16 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
   const wins = ranked(scope.predictedWins).slice(0, 3)
 
   return (
-    <Card className="gap-4">
+    <Card className="gap-4 desk:min-h-0 desk:overflow-auto">
       <CardHeader>
         <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-[250px_minmax(0,1fr)_330px] gap-8">
+        {/* Wide row under the header on smaller screens; a single column in the desktop sidebar. */}
+        <div className="grid grid-cols-[250px_minmax(0,1fr)_330px] gap-8 desk:grid-cols-1 desk:gap-6">
           {/* Hero: predicted largest party and its share. */}
-          <div className="grid content-start gap-2 border-r pr-8">
+          <div className="grid content-start gap-2 border-r pr-8 desk:border-r-0 desk:border-b desk:pr-0 desk:pb-6">
             <p className="text-sm text-muted-foreground">Predicted largest party</p>
             {leader ? (
               <>
@@ -81,7 +82,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
           {/* Predicted vote share vs the count so far, same block order. */}
           <div className="grid content-start gap-4">
             <div className="grid gap-2">
-              <div className="flex items-baseline justify-between gap-4 text-sm">
+              <div className="flex items-baseline justify-between gap-4 text-sm desk:flex-col desk:items-start desk:gap-0.5">
                 <span className="font-medium">Predicted vote share</span>
                 <span className="text-xs text-muted-foreground">
                   {scope.predictedSource === "model" ? "Model forecast" : `Built from ${int(scope.wardCount)} ward forecasts`}
@@ -90,7 +91,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
               <SegmentedBar shares={scope.predictedShares} order={order} />
             </div>
             <div className="grid gap-2">
-              <div className="flex items-baseline justify-between gap-4 text-sm">
+              <div className="flex items-baseline justify-between gap-4 text-sm desk:flex-col desk:items-start desk:gap-0.5">
                 <span className="font-medium">Counted so far</span>
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {int(scope.votesCounted)} votes · {scope.reporting} of {scope.wardCount} wards reporting
@@ -108,7 +109,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
           </div>
 
           {/* Progress of the count against the forecast. */}
-          <div className="grid grid-cols-2 content-start gap-x-6 gap-y-5 border-l pl-8">
+          <div className="grid grid-cols-2 content-start gap-x-6 gap-y-5 border-l pl-8 desk:border-l-0 desk:border-t desk:pt-6 desk:pl-0">
           <Stat
             label="Wards reporting"
             value={

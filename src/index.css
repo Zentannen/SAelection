@@ -72,6 +72,11 @@
   --critical: #f07171;
 }
 
+/* Desktop layout breakpoint: three columns from 1600px wide. */
+@theme {
+  --breakpoint-desk: 100rem;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

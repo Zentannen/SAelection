@@ -140,13 +140,19 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-svh">
-        <header className="border-b bg-card/60 backdrop-blur">
-          <div className="mx-auto flex max-w-[1400px] items-end justify-between gap-6 px-6 py-5">
+      {/* Desktop: the page fills the window and each column scrolls on its own. */}
+      <div className="flex min-h-svh flex-col desk:h-svh">
+        <header className="shrink-0 border-b bg-card/60 backdrop-blur">
+          <div className="mx-auto flex max-w-[2560px] items-center justify-between gap-6 px-8 py-4">
             <div>
               <h1 className="text-2xl font-semibold tracking-tight">Election predictions</h1>
               <p className="text-sm text-muted-foreground">
                 Forecast and live count, from the whole area down to each district and ward.
+                {isSample && (
+                  <span className="ml-2 text-amber-700 dark:text-amber-300">
+                    Synthetic sample data: wards, districts, forecasts, past results and the count are all made up.
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -182,14 +188,8 @@ export default function App() {
           </div>
         </header>
 
-        <main className="mx-auto grid max-w-[1400px] gap-4 px-6 py-6">
-          {isSample && (
-            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-800 dark:text-amber-200">
-              Showing synthetic sample data. Ward shapes, districts, predictions, past results and the count are all
-              made up. See the README to load real data.
-            </p>
-          )}
-
+        <main className="mx-auto grid w-full max-w-[2560px] flex-1 grid-cols-[minmax(0,1fr)_420px] gap-5 px-8 py-6 desk:min-h-0 desk:grid-cols-[400px_minmax(0,1fr)_440px] desk:grid-rows-[minmax(0,1fr)]">
+          <div className="col-span-2 grid min-w-0 desk:col-span-1 desk:min-h-0">
           <PredictionOverview
             scope={scope}
             order={order}
@@ -200,9 +200,9 @@ export default function App() {
                 : `All ${overall.wardCount} wards${districts.length ? ` across ${districts.length} districts` : ""}`
             }
           />
+          </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_400px] gap-4">
-            <Card className="min-w-0 gap-4">
+            <Card className="min-w-0 gap-4 desk:min-h-0">
               <CardHeader>
                 <CardTitle>Ward map</CardTitle>
                 <CardDescription>
@@ -226,8 +226,8 @@ export default function App() {
                   </ToggleGroup>
                 </CardAction>
               </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="h-[min(72vh,680px)] min-h-[440px] overflow-hidden rounded-lg border bg-muted/30">
+              <CardContent className="flex flex-col gap-4 desk:min-h-0 desk:flex-1">
+                <div className="h-[min(72vh,760px)] min-h-[480px] overflow-hidden rounded-lg border bg-muted/30 desk:h-auto desk:min-h-0 desk:flex-1">
                   <WardMap
                     wards={wards}
                     fillFor={fill}
@@ -244,8 +244,8 @@ export default function App() {
               </CardContent>
             </Card>
 
-            <Card className="min-w-0 gap-4">
-              <Tabs value={panel} onValueChange={(v) => setPanel(v as Panel)} className="gap-4">
+            <Card className="min-w-0 gap-4 desk:min-h-0">
+              <Tabs value={panel} onValueChange={(v) => setPanel(v as Panel)} className="gap-4 desk:min-h-0 desk:flex-1">
                 <CardHeader>
                   <TabsList className="w-full">
                     <TabsTrigger value="districts">Districts</TabsTrigger>
@@ -261,7 +261,7 @@ export default function App() {
                     </TabsTrigger>
                   </TabsList>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="desk:min-h-0 desk:flex-1 desk:overflow-auto">
                   <TabsContent value="districts" className="grid gap-3">
                     <p className="text-sm text-muted-foreground">
                       Forecast vs count by district. Click one to zoom in; hover to find it on the map.
@@ -286,7 +286,7 @@ export default function App() {
                       Wards where someone other than the predicted winner leads{focused ? ` in ${focused.name}` : ""}.
                       Click one for its detail.
                     </p>
-                    <div className="max-h-[560px] overflow-auto">
+                    <div className="max-h-[640px] overflow-auto desk:max-h-none">
                       <UpsetsTable wards={scopeWards} onHoverWard={setTableHoverId} onSelectWard={selectWard} />
                     </div>
                   </TabsContent>
@@ -300,7 +300,6 @@ export default function App() {
                 </CardContent>
               </Tabs>
             </Card>
-          </div>
         </main>
 
         {hover && hovered && <WardHoverCard ward={hovered} x={hover.x} y={hover.y} />}
