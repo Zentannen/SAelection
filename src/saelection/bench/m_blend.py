@@ -26,3 +26,10 @@ def _mix(projs, rng, weights=None):
 
 def blend_cf_ml(case, counted, rng):
     return _mix([hybrid_cf(case, counted, rng), ml_mixed_gbm_shift(case, counted, rng)], rng)
+
+
+def blend_asa_ml(case, counted, rng):
+    """Equal-weight mixture of m_vbest.asa_rake_half (hybrid_cf + ActionSA local-election
+    baseline + raked spatial residual pull) and m_ml.ml_mixed_gbm_shift."""
+    from .m_vbest import asa_rake_half
+    return _mix([asa_rake_half(case, counted, rng), ml_mixed_gbm_shift(case, counted, rng)], rng)
