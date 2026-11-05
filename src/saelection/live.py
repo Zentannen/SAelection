@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path
 
 os.environ.setdefault("XLA_FLAGS", "--xla_force_host_platform_device_count=4")
@@ -239,13 +240,13 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
 
         def init(site=None):
             if site is None:
-                return init
+                return partial(init)
             if site["name"] == "A":
                 return jnp.asarray(A_loc, jnp.float32)
             return jnp.zeros(site["fn"].shape(), jnp.float32) if site["name"] in ("phi", "psi", "d_raw") \
                 else numpyro.infer.init_to_median(site)
 
-        guide = AutoNormal(live_model, init_loc_fn=init, init_scale=0.02)
+        guide = AutoNormal(live_model, init_loc_fn=partial(init), init_scale=0.02)
         opt = optax.adam(optax.cosine_decay_schedule(0.02, vi_steps, alpha=0.02))
         res = SVI(live_model, guide, opt, Trace_ELBO()).run(jax.random.PRNGKey(seed), vi_steps,
                                                             progress_bar=False, **kw)
