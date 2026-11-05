@@ -11,7 +11,7 @@ A web app for following the 2026 local government election forecast for **Gauten
 
   Pick a district (header menu, district list, or a click on the map) and the panel switches to that district's prediction.
 - **Districts.** District borders are drawn heavier than ward borders, and each district is labelled on the map. The **Districts** tab lists every district with its predicted largest party, forecast vs counted vote share, wards reporting, how often the prediction is holding, and upsets. Hovering a district outlines it on the map; clicking one zooms to it and fades the others. Press **Esc** or click **All districts** to zoom back out.
-- **Ward map.** Each ward is filled with its predicted winner's colour; darker shading means a more confident prediction. Scroll or pinch to zoom, drag to pan, or use the + / − / reset buttons. The **Current result** toggle recolours the map by who leads now.
+- **Ward map.** Each ward is filled with its predicted winner's colour; darker shading means a more confident prediction. Scroll or pinch to zoom, drag to pan, or use the + / − / reset buttons. The **Current result** toggle recolours the map by who leads now. The party chips under the map highlight one party's wards: hover to preview, click to pin.
 - **Hover card.** Hovering a ward shows its count status, votes and turnout, whether the leader matches the prediction, and each party's current share with a tick at its predicted share.
 - **Ward panel.** Clicking a ward opens its panel and zooms to its district. The panel has:
   - the current result against the prediction
@@ -22,7 +22,7 @@ A web app for following the 2026 local government election forecast for **Gauten
 - **Parties and Upsets tabs.** Predicted ward wins against wards each party leads now, and the wards where someone other than the predicted winner leads. Both follow the selected district.
 - **Live updates.** `results.json` is reloaded every 60 seconds.
 
-The layout is designed for laptop and desktop screens.
+The layout is built for desktop screens. From 1600px wide the page fills the window in three columns (prediction, map, panels) and plain scrolling over the map zooms it. Narrower windows stack the panels and scroll the page, so there you zoom with Ctrl/⌘ + scroll or a trackpad pinch.
 
 ## Why it's being built
 
@@ -107,7 +107,9 @@ Change `WardID` to whatever the shapefile calls its ward code, and add the `dist
   "districts": { "City of Johannesburg": { "shares": { "ANC": 35.2, "DA": 29.8 } } } }
 ```
 
-`overall` and `districts` are optional. If your model produces its own area-wide or district figures, put them here and the app shows them as-is ("Model forecast"). Otherwise the app builds them from the ward forecasts: an average of each ward's predicted shares, weighted by registered voters (from `results.json`) when every ward has that figure, and counting each ward equally if not.
+`overall` and `districts` are optional. If your model produces its own area-wide or district figures, put them here and the app uses them ("Model forecast"). Otherwise the app builds them from the ward forecasts: an average of each ward's predicted shares, weighted by registered voters from `results.json`. A ward without a registered figure counts as an average-sized ward; with no registered figures at all, every ward counts equally.
+
+Shares are percentages of the vote. If a set adds up to less than 100, which is fine if you only list the main parties, the remainder is shown as **Other**. An unlisted remainder is never treated as the predicted winner.
 
 ### `results.json`: the live count
 

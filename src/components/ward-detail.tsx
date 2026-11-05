@@ -2,7 +2,8 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { StatusBadge } from "@/components/status-badge"
-import { CountChart, ElectionsChart } from "@/components/ward-charts"
+import { memo, useMemo } from "react"
+import { CountChart, ElectionsChart, wardSeries } from "@/components/ward-charts"
 import { ShareBars, Verdict } from "@/components/ward-hover-card"
 import type { WardSummary } from "@/lib/model"
 import type { Election } from "@/types"
@@ -20,7 +21,7 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 /** Everything about one ward: the current result and its vote share over time. */
-export function WardDetail({
+export const WardDetail = memo(function WardDetail({
   ward,
   elections,
   order,
@@ -33,6 +34,8 @@ export function WardDetail({
 }) {
   const { name, municipality, district } = ward.feature.properties
   const pastLabels = elections.filter((e) => ward.history?.[e.id]).map((e) => e.label)
+  // One party set for both charts, so their lines and "Other" match.
+  const series = useMemo(() => wardSeries(ward, elections, order), [ward, elections, order])
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-5">
@@ -65,14 +68,14 @@ export function WardDetail({
             : "Past results, then the 2026 forecast and count"
         }
       >
-        <ElectionsChart ward={ward} elections={elections} order={order} />
+        <ElectionsChart ward={ward} elections={elections} series={series} />
       </Section>
 
       <Separator />
 
       <Section title="Election night count" description="Running vote share at each results update">
-        <CountChart ward={ward} order={order} />
+        <CountChart ward={ward} series={series} />
       </Section>
     </div>
   )
-}
+})

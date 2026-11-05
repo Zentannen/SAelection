@@ -21,6 +21,9 @@ export function buildDistrictGeometry(wards: WardCollection) {
   const object = topo.objects.wards
   const districtOf = (g: { properties?: object | null }) => (g.properties as Partial<WardProperties> | undefined)?.district || null
 
+  /** Outer edge of the whole area: edges that belong to only one ward. */
+  const outer: MultiLineString = mesh(topo, object, (a, b) => a === b)
+
   /** Borders between two different districts (not the outer edge of the map). */
   const borders: MultiLineString = mesh(topo, object, (a, b) => a !== b && districtOf(a) !== districtOf(b))
 
@@ -37,5 +40,5 @@ export function buildDistrictGeometry(wards: WardCollection) {
     return line
   }
 
-  return { borders, outline }
+  return { outer, borders, outline }
 }

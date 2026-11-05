@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { geoMercator, geoPath } from "d3-geo"
 import { select } from "d3-selection"
 import "d3-transition"
-import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom"
+import { zoom, zoomIdentity, zoomTransform, type ZoomBehavior, type ZoomTransform } from "d3-zoom"
 import { ArrowLeft, Maximize2, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { buildDistrictGeometry } from "@/lib/geo"
@@ -25,6 +25,7 @@ interface Props {
   highlightedId?: string | null
   /** Ward whose detail panel is open; stays outlined. */
   selectedId?: string | null
+  /** Called when the pointer (or keyboard focus) moves onto a different ward, or off the wards. */
   onHover: (e: HoverEvent | null) => void
   /** Click / Enter on a ward. */
   onSelectWard?: (id: string) => void
@@ -35,8 +36,69 @@ interface Props {
   onSelectDistrict?: (district: string | null) => void
 }
 
+interface WardPathInfo {
+  id: string
+  label: string
+  district: string | null
+  d: string
+}
+
 const PAD = 12
 const MAX_ZOOM = 16
+
+/**
+ * The ward fills. Memoised so hovering (which only moves an outline) doesn't
+ * re-render thousands of paths; it re-renders only when shapes, colours or
+ * the focused district change.
+ */
+const WardPaths = memo(function WardPaths({
+  paths,
+  fillFor,
+  focusDistrict,
+  onEnter,
+  onSelect,
+  onLeaveFocus,
+}: {
+  paths: WardPathInfo[]
+  fillFor: (id: string) => WardFill
+  focusDistrict: string | null
+  onEnter: (id: string, x: number, y: number) => void
+  onSelect: (id: string) => void
+  onLeaveFocus: () => void
+}) {
+  return (
+    <>
+      {paths.map(({ id, label, d, district }) => {
+        const { color, opacity } = fillFor(id)
+        const dimmed = !!focusDistrict && district !== focusDistrict
+        return (
+          <path
+            key={id}
+            d={d}
+            data-ward={id}
+            className={dimmed ? "ward dimmed" : "ward"}
+            style={{ fill: color, fillOpacity: opacity }}
+            tabIndex={0}
+            aria-label={district ? `${label}, ${district}` : label}
+            onPointerEnter={(e) => onEnter(id, e.clientX, e.clientY)}
+            onClick={() => onSelect(id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onSelect(id)
+              }
+            }}
+            onFocus={(e) => {
+              const r = e.currentTarget.getBoundingClientRect()
+              onEnter(id, r.left + r.width / 2, r.top + r.height / 2)
+            }}
+            onBlur={onLeaveFocus}
+          />
+        )
+      })}
+    </>
+  )
+})
 
 export function WardMap({
   wards,
@@ -52,9 +114,29 @@ export function WardMap({
   const wrapRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const layerRef = useRef<SVGGElement>(null)
+  const labelsRef = useRef<SVGGElement>(null)
+  const badgeRef = useRef<HTMLDivElement>(null)
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
+  // Only used to enable/disable the zoom buttons; updated when a zoom gesture ends.
   const [scale, setScale] = useState(1)
+
+  // Latest callbacks in refs, so the memoised ward layer gets stable handlers.
+  const onHoverRef = useRef(onHover)
+  const onSelectWardRef = useRef(onSelectWard)
+  useEffect(() => {
+    onHoverRef.current = onHover
+    onSelectWardRef.current = onSelectWard
+  })
+  const hoveringRef = useRef<string | null>(null)
+  const setHovered = useCallback((e: HoverEvent | null) => {
+    if ((e?.id ?? null) === hoveringRef.current) return
+    hoveringRef.current = e?.id ?? null
+    onHoverRef.current(e)
+  }, [])
+  const handleEnter = useCallback((id: string, x: number, y: number) => setHovered({ id, x, y }), [setHovered])
+  const handleSelect = useCallback((id: string) => onSelectWardRef.current?.(id), [])
+  const handleLeave = useCallback(() => setHovered(null), [setHovered])
 
   useEffect(() => {
     const el = wrapRef.current
@@ -69,7 +151,17 @@ export function WardMap({
 
   // Pan & zoom: wheel / pinch / drag. The transform is applied straight to the
   // <g> (no React re-render per frame), so it stays smooth with thousands of
-  // wards. --k lets labels and outlines counter-scale to a constant size.
+  // wards. --k (set on the label layer only) keeps district names a constant size.
+  const applyTransform = useCallback((t: ZoomTransform) => {
+    layerRef.current?.setAttribute("transform", t.toString())
+    labelsRef.current?.style.setProperty("--k", String(t.k))
+    const badge = badgeRef.current
+    if (badge) {
+      badge.textContent = `${t.k.toFixed(1)}×`
+      badge.style.display = t.k > 1.05 ? "" : "none"
+    }
+  }, [])
+
   useEffect(() => {
     const svg = svgRef.current
     if (!svg || !size.width) return
@@ -79,19 +171,58 @@ export function WardMap({
         [0, 0],
         [size.width, size.height],
       ])
+      .extent([
+        [0, 0],
+        [size.width, size.height],
+      ])
+      // A few pixels of wobble during a click still counts as a click, not a pan.
+      .clickDistance(4)
+      // d3 speeds up Ctrl-wheel tenfold for trackpad pinches (small deltas); a
+      // Ctrl + mouse-wheel notch (large delta) would otherwise jump 4× at once.
+      .wheelDelta((e: WheelEvent) => {
+        const unit = e.deltaMode === 1 ? 0.05 : e.deltaMode ? 1 : 0.002
+        const pinch = e.ctrlKey && Math.abs(e.deltaY) < 50
+        return -e.deltaY * unit * (pinch ? 10 : 1)
+      })
+      .filter((event: Event & { ctrlKey?: boolean; metaKey?: boolean; button?: number; type: string }) => {
+        if (event.button) return false
+        if (event.type === "wheel") {
+          // When the page itself scrolls (narrower windows), plain scrolling scrolls
+          // the page; Ctrl/⌘ + scroll or a pinch zooms the map.
+          const pageScrolls = document.documentElement.scrollHeight > window.innerHeight + 1
+          return !pageScrolls || !!event.ctrlKey || !!event.metaKey
+        }
+        return !event.ctrlKey
+      })
       .on("start", () => svg.classList.add("cursor-grabbing"))
-      .on("end", () => svg.classList.remove("cursor-grabbing"))
-      .on("zoom", (event) => {
-        layerRef.current?.setAttribute("transform", event.transform.toString())
-        svg.style.setProperty("--k", String(event.transform.k))
+      .on("end", (event) => {
+        svg.classList.remove("cursor-grabbing")
         setScale(event.transform.k)
       })
+      .on("zoom", (event) => applyTransform(event.transform))
     zoomRef.current = behaviour
     select(svg).call(behaviour).on("dblclick.zoom", null)
     return () => {
       select(svg).on(".zoom", null)
     }
-  }, [size.width, size.height])
+  }, [size.width, size.height, applyTransform])
+
+  /** Clamp a transform to the pan limits, so a programmatic zoom never needs to jump later. */
+  const constrain = useCallback(
+    (t: ZoomTransform) => {
+      const z = zoomRef.current
+      if (!z) return t
+      return z.constrain()(
+        t,
+        [
+          [0, 0],
+          [size.width, size.height],
+        ],
+        z.translateExtent(),
+      )
+    },
+    [size.width, size.height],
+  )
 
   const zoomBy = useCallback((factor: number) => {
     const svg = svgRef.current
@@ -115,7 +246,7 @@ export function WardMap({
       wards,
     )
     const path = geoPath(projection)
-    const paths = wards.features.map((f) => ({
+    const shapes = wards.features.map((f) => ({
       id: f.properties.ward_id,
       label: f.properties.name ?? f.properties.ward_id,
       district: f.properties.district || null,
@@ -127,7 +258,7 @@ export function WardMap({
 
     // District label sits at the area-weighted centre of its wards.
     const districts = new Map<string, { x: number; y: number; area: number; x0: number; y0: number; x1: number; y1: number }>()
-    for (const p of paths) {
+    for (const p of shapes) {
       if (!p.district || !Number.isFinite(p.centroid[0])) continue
       const d = districts.get(p.district) ?? { x: 0, y: 0, area: 0, x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
       d.x += p.centroid[0] * p.area
@@ -151,34 +282,67 @@ export function WardMap({
 
     return {
       path,
-      paths,
+      shapes,
+      paths: shapes.map(({ id, label, district, d }) => ({ id, label, district, d })),
       districtInfo,
-      outline: path(wards) ?? "",
+      outline: path(districtGeometry.outer) ?? "",
       borders: path(districtGeometry.borders) ?? "",
     }
   }, [wards, size, districtGeometry])
 
-  // Zoom to the focused district (or back out to the whole map).
+  /** Transform that fits the focused district (or the whole map), within the pan limits. */
+  const focusTransform = useCallback(
+    (district: string | null) => {
+      const target = district && geo ? geo.districtInfo.find((d) => d.name === district) : null
+      if (!target) return zoomIdentity
+      const [[x0, y0], [x1, y1]] = target.bounds
+      const k = Math.min(MAX_ZOOM, 0.88 / Math.max((x1 - x0) / size.width, (y1 - y0) / size.height))
+      return constrain(
+        zoomIdentity
+          .translate(size.width / 2, size.height / 2)
+          .scale(Math.max(1, k))
+          .translate(-(x0 + x1) / 2, -(y0 + y1) / 2),
+      )
+    },
+    [geo, size.width, size.height, constrain],
+  )
+
+  // Zoom (animated) when the focused district changes — and only then, so
+  // colour changes, legend highlights or results updates never reset the view.
+  const lastFocus = useRef<string | null | undefined>(undefined)
   useEffect(() => {
     const svg = svgRef.current
     if (!svg || !zoomRef.current || !geo) return
-    const target = focusDistrict ? geo.districtInfo.find((d) => d.name === focusDistrict) : null
-    let transform = zoomIdentity
-    if (target) {
-      const [[x0, y0], [x1, y1]] = target.bounds
-      const k = Math.min(MAX_ZOOM, 0.88 / Math.max((x1 - x0) / size.width, (y1 - y0) / size.height))
-      transform = zoomIdentity
-        .translate(size.width / 2, size.height / 2)
-        .scale(Math.max(1, k))
-        .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
-    }
-    select(svg).transition().duration(650).call(zoomRef.current.transform, transform)
-  }, [focusDistrict, geo, size.width, size.height])
+    if (lastFocus.current === focusDistrict) return
+    const first = lastFocus.current === undefined
+    lastFocus.current = focusDistrict
+    if (first && !focusDistrict) return
+    select(svg).transition().duration(650).call(zoomRef.current.transform, focusTransform(focusDistrict))
+  }, [focusDistrict, geo, focusTransform])
 
-  // Escape leaves district focus.
+  // When the map is resized: keep a focused district fitted, otherwise keep the
+  // user's zoom, just clamped to the new size.
+  useEffect(() => {
+    const svg = svgRef.current
+    const z = zoomRef.current
+    if (!svg || !z || !geo || lastFocus.current === undefined) return
+    const next = lastFocus.current ? focusTransform(lastFocus.current) : constrain(zoomTransform(svg))
+    select(svg).call(z.transform, next)
+    setScale(next.k)
+    // Run on size changes only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [size.width, size.height])
+
+  // Escape leaves district focus — but not when it is closing a dropdown or dialog.
   useEffect(() => {
     if (!focusDistrict || !onSelectDistrict) return
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onSelectDistrict(null)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return
+      const target = e.target as Element | null
+      if (target?.closest?.('[role="listbox"], [role="dialog"], [role="menu"], [data-radix-popper-content-wrapper]')) return
+      if (document.querySelector('[data-radix-popper-content-wrapper], [role="listbox"]')) return
+      onSelectDistrict(null)
+    }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [focusDistrict, onSelectDistrict])
@@ -206,38 +370,24 @@ export function WardMap({
         width={size.width}
         height={size.height}
         className="absolute inset-0 block cursor-grab touch-none select-none"
-        onPointerLeave={() => onHover(null)}
+        onPointerLeave={handleLeave}
+        // Moving onto empty map (outside every ward) clears the hover.
+        onPointerMove={(e) => {
+          if (hoveringRef.current && !(e.target as Element).classList?.contains("ward")) handleLeave()
+        }}
       >
         <g ref={layerRef}>
           {/* Ward fills, each with its own boundary line. */}
-          {geo?.paths.map(({ id, label, d, district }) => {
-            const { color, opacity } = fillFor(id)
-            const dimmed = !!focusDistrict && district !== focusDistrict
-            return (
-              <path
-                key={id}
-                d={d}
-                className={dimmed ? "ward dimmed" : "ward"}
-                style={{ fill: color, fillOpacity: opacity }}
-                tabIndex={0}
-                aria-label={district ? `${label}, ${district}` : label}
-                onPointerEnter={(e) => onHover({ id, x: e.clientX, y: e.clientY })}
-                onPointerMove={(e) => onHover({ id, x: e.clientX, y: e.clientY })}
-                onClick={() => onSelectWard?.(id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    onSelectWard?.(id)
-                  }
-                }}
-                onFocus={(e) => {
-                  const r = e.currentTarget.getBoundingClientRect()
-                  onHover({ id, x: r.left + r.width / 2, y: r.top + r.height / 2 })
-                }}
-                onBlur={() => onHover(null)}
-              />
-            )
-          })}
+          {geo && (
+            <WardPaths
+              paths={geo.paths}
+              fillFor={fillFor}
+              focusDistrict={focusDistrict}
+              onEnter={handleEnter}
+              onSelect={handleSelect}
+              onLeaveFocus={handleLeave}
+            />
+          )}
           {/* District borders: heavier than ward lines. */}
           {geo && <path d={geo.borders} className="district-border" />}
           {/* Outer edge of the whole area. */}
@@ -247,18 +397,20 @@ export function WardMap({
           {/* Drawn last so ward outlines sit above their neighbours. */}
           {selected && <path d={selected.d} className="ward-selected" />}
           {highlighted && <path d={highlighted.d} className="ward-outline" />}
-          {geo?.districtInfo.map((d) => (
-            <text
-              key={d.name}
-              x={d.x}
-              y={d.y}
-              className={focusDistrict && focusDistrict !== d.name ? "district-label dimmed" : "district-label"}
-              textAnchor="middle"
-              dominantBaseline="central"
-            >
-              {d.name}
-            </text>
-          ))}
+          <g ref={labelsRef}>
+            {geo?.districtInfo.map((d) => (
+              <text
+                key={d.name}
+                x={d.x}
+                y={d.y}
+                className={focusDistrict && focusDistrict !== d.name ? "district-label dimmed" : "district-label"}
+                textAnchor="middle"
+                dominantBaseline="central"
+              >
+                {d.name}
+              </text>
+            ))}
+          </g>
         </g>
       </svg>
 
@@ -288,11 +440,11 @@ export function WardMap({
           <Maximize2 />
         </Button>
       </div>
-      {scale > 1.05 && (
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-md border bg-card/90 px-2 py-0.5 text-xs text-muted-foreground tabular-nums shadow-sm backdrop-blur">
-          {scale.toFixed(1)}×
-        </div>
-      )}
+      <div
+        ref={badgeRef}
+        style={{ display: "none" }}
+        className="pointer-events-none absolute bottom-3 left-3 rounded-md border bg-card/90 px-2 py-0.5 text-xs text-muted-foreground tabular-nums shadow-sm backdrop-blur"
+      />
     </div>
   )
 }

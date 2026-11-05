@@ -40,7 +40,9 @@ export function SegmentedBar({ shares, order, variant = "tall", className, ...re
 
   const bucketed = bucketShares(shares)
   const keys = [...order, ...Object.keys(bucketed).filter((k) => !order.includes(k))]
-  const total = keys.reduce((sum, k) => sum + (bucketed[k] ?? 0), 0)
+  // Shares are percentages: never stretch a set that adds up to less than 100
+  // (the model layer fills any remainder in as "Other"); only shrink one over 100.
+  const total = Math.max(100, keys.reduce((sum, k) => sum + (bucketed[k] ?? 0), 0))
   const parts = keys
     .map((party) => ({ party, value: total ? ((bucketed[party] ?? 0) / total) * 100 : 0 }))
     .filter((p) => p.value > 0)
@@ -66,7 +68,8 @@ export function SegmentedBar({ shares, order, variant = "tall", className, ...re
               <div
                 className={cn(
                   "flex min-w-0 items-center transition-[flex-grow] duration-500",
-                  tall ? "rounded-[4px] px-2 text-[11px] font-semibold tabular-nums" : "rounded-[1px]",
+                  // Padding only when a label is printed, so small parties keep their true width.
+                  tall ? cn("rounded-[4px] text-[11px] font-semibold tabular-nums", label && "px-2") : "rounded-[1px]",
                 )}
                 style={{ flexGrow: value, flexBasis: 0, background: partyColor(party), color: partyInk(party) }}
               >
@@ -83,11 +86,12 @@ export function SegmentedBar({ shares, order, variant = "tall", className, ...re
   )
 }
 
-/** Legend for segmented bars: names in block order, no numbers. */
-export function SegmentLegend({ order, className }: { order: string[]; className?: string }) {
+/** Legend for segmented bars: names in block order, no numbers. Lists only parties present in `shares`. */
+export function SegmentLegend({ order, shares, className }: { order: string[]; shares?: Shares[]; className?: string }) {
+  const present = shares ? new Set(shares.flatMap((s) => Object.entries(bucketShares(s)).filter(([, v]) => v > 0).map(([p]) => p))) : null
   return (
     <div className={cn("flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground", className)}>
-      {order.map((p) => (
+      {order.filter((p) => !present || present.has(p)).map((p) => (
         <span key={p} className="flex items-center gap-1.5" title={partyName(p)}>
           <span className="size-2.5 rounded-[3px]" style={{ background: partyColor(p) }} />
           <span className="text-foreground">{p}</span>

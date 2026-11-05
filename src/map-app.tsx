@@ -126,9 +126,11 @@ export function MapApp({ nav }: { nav?: ReactNode }) {
   const focused = district ? districts.find((d) => d.name === district) : undefined
 
   // One block order for every segmented bar and line chart: overall forecast, largest first, "Other" last.
+  // Every coloured party is always included (after the forecast-ranked ones), so a
+  // party the forecast leaves out still gets its own colour, legend entry and line.
   const order = useMemo(() => {
     const keys = ranked(bucketShares(Object.keys(overall.predictedShares).length ? overall.predictedShares : overall.countedShares)).map(([p]) => p).filter((p) => p !== OTHER)
-    return [...keys, OTHER]
+    return [...keys, ...MAIN_PARTIES.filter((p) => !keys.includes(p)), OTHER]
   }, [overall])
 
   const selectDistrict = useCallback(
@@ -147,8 +149,11 @@ export function MapApp({ nav }: { nav?: ReactNode }) {
     (id: string) => {
       setSelectedWardId(id)
       setPanel("ward")
-      const d = byId.get(id)?.district
-      if (d) setDistrict(d)
+      // Leaving the list/table that triggered this unmounts it, so clear its hover outline.
+      setTableHoverId(null)
+      setHoverDistrict(null)
+      // Follow the ward's district; a ward with no district shows the whole area.
+      setDistrict(byId.get(id)?.district ?? null)
     },
     [byId],
   )
@@ -245,8 +250,10 @@ export function MapApp({ nav }: { nav?: ReactNode }) {
               <CardHeader>
                 <CardTitle>Ward map</CardTitle>
                 <CardDescription>
-                  {colourBy === "prediction" ? "Coloured by predicted winner" : "Coloured by current leader"} · scroll
-                  to zoom · click a ward for its history
+                  {colourBy === "prediction" ? "Coloured by predicted winner" : "Coloured by current leader"} ·{" "}
+                  {/* In the full-height desktop layout the page doesn't scroll, so plain scrolling zooms the map. */}
+                  <span className="hidden desk:inline">scroll to zoom</span>
+                  <span className="desk:hidden">Ctrl + scroll to zoom</span> · click a ward for its history
                 </CardDescription>
                 <CardAction>
                   <ToggleGroup
@@ -290,7 +297,15 @@ export function MapApp({ nav }: { nav?: ReactNode }) {
             </Card>
 
             <Card className="min-w-0 gap-4 desk:min-h-0">
-              <Tabs value={panel} onValueChange={(v) => setPanel(v as Panel)} className="gap-4 desk:min-h-0 desk:flex-1">
+              <Tabs
+                value={panel}
+                onValueChange={(v) => {
+                  setPanel(v as Panel)
+                  setTableHoverId(null)
+                  setHoverDistrict(null)
+                }}
+                className="gap-4 desk:min-h-0 desk:flex-1"
+              >
                 <CardHeader>
                   <TabsList className="w-full">
                     <TabsTrigger value="districts">Districts</TabsTrigger>
