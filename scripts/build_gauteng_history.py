@@ -1,6 +1,6 @@
 """Build public/data/history.json: past vote share per 2026 Gauteng ward.
 
-Past voting-district (VD) results are moved onto the 2026 wards with the VD->ward crosswalk
+Past voting-district (VD) results (2016/2021 local PR ballot, 2019/2024 Gauteng provincial ballot) are moved onto the 2026 wards with the VD->ward crosswalk
 (a VD split across wards is shared by its registered-voter weight). VDs that no longer exist
 in 2026 are left out, so coverage per ward is reported.
 
@@ -12,7 +12,7 @@ import json
 import sys
 from collections import defaultdict
 
-ELECTIONS = [("LGE2016", "2016 local"), ("PE2019", "2019 national"), ("LGE2021", "2021 local"), ("PE2024", "2024 national")]
+ELECTIONS = [("LGE2016", "2016 local"), ("PE2019", "2019 provincial"), ("LGE2021", "2021 local"), ("PE2024", "2024 provincial")]
 PARTIES = {"DA": "DA", "ANC": "ANC", "ACTIONSA": "ActionSA", "MK": "MK", "EFF": "EFF", "OTHER": "Other"}
 
 
