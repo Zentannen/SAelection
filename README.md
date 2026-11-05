@@ -84,6 +84,10 @@ Change `WardID` to whatever the shapefile calls its ward code. Either ring windi
 
 Overwrite this file as results arrive. The app picks up the new file within a minute.
 
+## Coalition scenario plan
+
+[`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md) sets out how different 2026 results could turn into governments in Johannesburg, Tshwane and Ekurhuleni, and what each outcome means for the Gauteng provincial government: the seat thresholds, what each party believes and needs, national-government pressure, metro-by-metro scenarios, and international precedents.
+
 ## Party colours
 
 Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). Only the main ward-winning parties (ANC, DA, EFF, MK, IFP) get their own colour; all other parties share a grey **Other** colour on the map and chart. Eight colours on one map can't all be told apart reliably, especially by colour-blind readers. Each party's name is always shown next to its colour in the hover card, legend and table.
