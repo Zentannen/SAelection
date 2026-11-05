@@ -1,0 +1,7 @@
+mode,order,pct_counted,tally_mae_pp,tally_max_pp,projection_mae_pp,projection_max_pp,coverage_90,uncounted_vd_mae_pp
+vd,ANC_strongholds_first,10,9.93,22.98,1.68,4.53,0.67,4.3
+vd,ANC_strongholds_first,25,9.22,21.48,2.19,4.99,0.67,4.77
+vd,DA_strongholds_first,10,14.81,40.87,2.89,8.18,0.67,5.61
+vd,DA_strongholds_first,25,12.94,33.76,2.43,6.69,0.67,5.56
+vd,random,10,0.52,1.1,0.37,0.68,1.0,3.79
+vd,random,25,0.33,0.81,0.37,1.06,1.0,3.74

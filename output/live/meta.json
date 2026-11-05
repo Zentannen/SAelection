@@ -1,0 +1,529 @@
+{
+  "generated_at": "2026-11-05T11:33:46+00:00",
+  "election": "2026 Local Government Elections - Gauteng (PR ballot)",
+  "parties": [
+    "DA",
+    "ANC",
+    "ACTIONSA",
+    "MK",
+    "EFF",
+    "OTHER"
+  ],
+  "categories": [
+    "DA",
+    "ANC",
+    "ACTIONSA",
+    "MK",
+    "EFF",
+    "OTHER",
+    "ABSTAIN"
+  ],
+  "n_vds": 2797,
+  "n_vds_counted_exact": 623,
+  "pct_vds_counted": 22.69,
+  "observed_files": [
+    "iec_live_vd.csv"
+  ],
+  "progress_files": [],
+  "n_progress_units": 0,
+  "warnings": [],
+  "n_draws": 500,
+  "iec_feed": [
+    {
+      "muni": "EKU",
+      "report_date": "2026-11-05T13:21:51.0421134+02:00",
+      "vd_expected": 653,
+      "vds_complete": 154,
+      "pct_vds_complete": 23.0,
+      "registered_2026": 1711998,
+      "ballots_per_voter": 1.9981,
+      "pr_valid": 168476,
+      "pr_by_party": {
+        "DA": 62557,
+        "ANC": 30323,
+        "ACTIONSA": 30488,
+        "MK": 9705,
+        "EFF": 8915,
+        "OTHER": 26488
+      },
+      "spoilt": 5751,
+      "special_votes": 11952
+    },
+    {
+      "muni": "JHB",
+      "report_date": "2026-11-05T13:21:54.1466033+02:00",
+      "vd_expected": 862,
+      "vds_complete": 150,
+      "pct_vds_complete": 17.0,
+      "registered_2026": 2417915,
+      "ballots_per_voter": 2.0003,
+      "pr_valid": 179231,
+      "pr_by_party": {
+        "DA": 69767,
+        "ANC": 31389,
+        "ACTIONSA": 31051,
+        "MK": 7673,
+        "EFF": 11915,
+        "OTHER": 27436
+      },
+      "spoilt": 3925,
+      "special_votes": 10270
+    },
+    {
+      "muni": "TSH",
+      "report_date": "2026-11-05T13:21:54.1537328+02:00",
+      "vd_expected": 796,
+      "vds_complete": 173,
+      "pct_vds_complete": 21.0,
+      "registered_2026": 1684463,
+      "ballots_per_voter": 1.9973,
+      "pr_valid": 135227,
+      "pr_by_party": {
+        "DA": 40146,
+        "ANC": 29385,
+        "ACTIONSA": 35381,
+        "MK": 2851,
+        "EFF": 7756,
+        "OTHER": 19708
+      },
+      "spoilt": 4438,
+      "special_votes": 10061
+    },
+    {
+      "muni": "GT421",
+      "report_date": "2026-11-05T13:21:58.6111211+02:00",
+      "vd_expected": 168,
+      "vds_complete": 4,
+      "pct_vds_complete": 2.0,
+      "registered_2026": 371556,
+      "ballots_per_voter": 1.9994,
+      "pr_valid": 5419,
+      "pr_by_party": {
+        "DA": 2996,
+        "ANC": 619,
+        "ACTIONSA": 229,
+        "MK": 68,
+        "EFF": 173,
+        "OTHER": 1334
+      },
+      "spoilt": 53,
+      "special_votes": 547
+    },
+    {
+      "muni": "GT422",
+      "report_date": "2026-11-05T13:22:00.029572+02:00",
+      "vd_expected": 39,
+      "vds_complete": 21,
+      "pct_vds_complete": 53.0,
+      "registered_2026": 66306,
+      "ballots_per_voter": 1.9968,
+      "pr_valid": 17132,
+      "pr_by_party": {
+        "DA": 9918,
+        "ANC": 2847,
+        "ACTIONSA": 796,
+        "MK": 591,
+        "EFF": 812,
+        "OTHER": 2168
+      },
+      "spoilt": 351,
+      "special_votes": 1054
+    },
+    {
+      "muni": "GT423",
+      "report_date": "2026-11-05T13:22:01.0098807+02:00",
+      "vd_expected": 40,
+      "vds_complete": 22,
+      "pct_vds_complete": 55.0,
+      "registered_2026": 55720,
+      "ballots_per_voter": 2.004,
+      "pr_valid": 13401,
+      "pr_by_party": {
+        "DA": 4338,
+        "ANC": 3665,
+        "ACTIONSA": 502,
+        "MK": 1464,
+        "EFF": 965,
+        "OTHER": 2467
+      },
+      "spoilt": 326,
+      "special_votes": 1329
+    },
+    {
+      "muni": "GT481",
+      "report_date": "2026-11-05T13:22:00.9766817+02:00",
+      "vd_expected": 115,
+      "vds_complete": 58,
+      "pct_vds_complete": 50.0,
+      "registered_2026": 202233,
+      "ballots_per_voter": 1.9951,
+      "pr_valid": 48231,
+      "pr_by_party": {
+        "DA": 21056,
+        "ANC": 10829,
+        "ACTIONSA": 3815,
+        "MK": 1327,
+        "EFF": 2910,
+        "OTHER": 8294
+      },
+      "spoilt": 1049,
+      "special_votes": 5361
+    },
+    {
+      "muni": "GT484",
+      "report_date": "2026-11-05T13:21:59.9744016+02:00",
+      "vd_expected": 77,
+      "vds_complete": 22,
+      "pct_vds_complete": 28.0,
+      "registered_2026": 98869,
+      "ballots_per_voter": 2.0032,
+      "pr_valid": 7300,
+      "pr_by_party": {
+        "DA": 2212,
+        "ANC": 2127,
+        "ACTIONSA": 251,
+        "MK": 409,
+        "EFF": 575,
+        "OTHER": 1726
+      },
+      "spoilt": 407,
+      "special_votes": 689
+    },
+    {
+      "muni": "GT485",
+      "report_date": "2026-11-05T13:22:04.2016316+02:00",
+      "vd_expected": 86,
+      "vds_complete": 50,
+      "pct_vds_complete": 58.0,
+      "registered_2026": 142004,
+      "ballots_per_voter": 1.9951,
+      "pr_valid": 36578,
+      "pr_by_party": {
+        "DA": 10733,
+        "ANC": 10668,
+        "ACTIONSA": 2731,
+        "MK": 2487,
+        "EFF": 3360,
+        "OTHER": 6599
+      },
+      "spoilt": 1091,
+      "special_votes": 4014
+    }
+  ],
+  "registered_total": 6751706,
+  "registered_growth": 1.032,
+  "registered_growth_source": "per municipality: IEC 2026 RegPop / 2024 certified roll",
+  "prior": {
+    "name": "pre-election polls (average, wide)",
+    "valid_vote_shares": {
+      "DA": 0.32,
+      "ANC": 0.285,
+      "ACTIONSA": 0.11,
+      "MK": 0.08,
+      "EFF": 0.075,
+      "OTHER": 0.13
+    },
+    "turnout": 0.43,
+    "A_sd": 0.35,
+    "sources": [
+      "Social Research Foundation, Q1 2026 Gauteng (registered voters): DA 37, ANC 31, ActionSA 7, EFF 5",
+      "eNCA/MarkData Gauteng: ANC 26, DA 27, ActionSA 15, MK 10, EFF 10",
+      "Turnout prior: 2021 LGE Gauteng PR valid-vote turnout 42.9% of registered"
+    ]
+  },
+  "model": {
+    "inference": {
+      "method": "variational posterior given the count so far",
+      "vi_steps": 6000,
+      "n_vd_observations": 623,
+      "n_aggregate_observations": 0,
+      "elbo": -34513.80078125,
+      "A_prior_mean": [
+        -2.498,
+        -1.735,
+        -2.788,
+        -3.349,
+        -3.129,
+        -2.609
+      ],
+      "A_post_mean": [
+        -1.9910000562667847,
+        -1.6369999647140503,
+        -2.371000051498413,
+        -3.3940000534057617,
+        -2.868000030517578,
+        -2.1559998989105225
+      ],
+      "b1_post_mean": [
+        0.6320000290870667,
+        0.5590000152587891,
+        0.04800000041723251,
+        0.4300000071525574,
+        0.11999999731779099,
+        0.2460000067949295
+      ],
+      "b2_post_mean": [
+        0.26100000739097595,
+        0.2680000066757202,
+        0.41200000047683716,
+        0.2840000092983246,
+        0.3799999952316284,
+        0.2460000067949295
+      ],
+      "calibration": {
+        "b_sd": 0.02,
+        "kappa_prov": [
+          0.091,
+          0.063,
+          0.066,
+          0.064,
+          0.061,
+          0.072
+        ],
+        "kappa_muni": 0.06,
+        "counted_vs_uncounted_gap": [
+          0.383,
+          0.042,
+          0.072,
+          0.044,
+          0.017,
+          0.156
+        ]
+      }
+    },
+    "structural_parameter_source": {
+      "DA": "T1",
+      "ANC": "T1",
+      "ACTIONSA": "T2",
+      "MK": "pooled",
+      "EFF": "T1",
+      "OTHER": "T1"
+    },
+    "spatial_term_kept": {
+      "DA": true,
+      "ANC": false,
+      "ACTIONSA": true,
+      "MK": true,
+      "EFF": false,
+      "OTHER": true,
+      "TURNOUT_COMMON": true
+    },
+    "spatial_lambda": {
+      "DA": 1.0,
+      "ANC": 0.0,
+      "ACTIONSA": 1.0,
+      "MK": 0.5,
+      "EFF": 0.0,
+      "OTHER": 1.0,
+      "TURNOUT_COMMON": 1.0
+    },
+    "substitution_C1_prev_LGE": [
+      [
+        0.0,
+        0.0,
+        -0.028,
+        0.0,
+        0.0,
+        0.063
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.004,
+        0.089,
+        0.005
+      ],
+      [
+        -0.07,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.626,
+        0.0,
+        -0.004,
+        0.0,
+        0.0
+      ],
+      [
+        0.112,
+        0.219,
+        -0.008,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "substitution_C2_prev_PE": [
+      [
+        0.0,
+        0.0,
+        -0.035,
+        0.0,
+        0.0,
+        -0.14
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        -0.036,
+        -0.098,
+        -0.1
+      ],
+      [
+        0.249,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.059
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.34,
+        0.0,
+        0.012,
+        0.0,
+        0.0
+      ],
+      [
+        0.111,
+        -0.285,
+        0.02,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "residual_corr_omega": [
+      [
+        1.0,
+        0.5260000228881836,
+        0.43700000643730164,
+        -0.09300000220537186,
+        0.5019999742507935,
+        0.3970000147819519
+      ],
+      [
+        0.5260000228881836,
+        1.0,
+        0.6039999723434448,
+        -0.32899999618530273,
+        0.722000002861023,
+        0.5389999747276306
+      ],
+      [
+        0.43700000643730164,
+        0.6039999723434448,
+        1.0,
+        0.07999999821186066,
+        0.5440000295639038,
+        0.4309999942779541
+      ],
+      [
+        -0.09300000220537186,
+        -0.32899999618530273,
+        0.07999999821186066,
+        1.0,
+        0.0010000000474974513,
+        0.10700000077486038
+      ],
+      [
+        0.5019999742507935,
+        0.722000002861023,
+        0.5440000295639038,
+        0.0010000000474974513,
+        1.0,
+        0.4560000002384186
+      ],
+      [
+        0.3970000147819519,
+        0.5389999747276306,
+        0.4309999942779541,
+        0.10700000077486038,
+        0.4560000002384186,
+        1.0
+      ]
+    ],
+    "substitution_partial_corr": [
+      [
+        1.0,
+        0.10000000149011612,
+        0.1379999965429306,
+        -0.06300000101327896,
+        0.1809999942779541,
+        0.13500000536441803
+      ],
+      [
+        0.10000000149011612,
+        1.0,
+        0.39500001072883606,
+        -0.5950000286102295,
+        0.5640000104904175,
+        0.382999986410141
+      ],
+      [
+        0.1379999965429306,
+        0.39500001072883606,
+        1.0,
+        0.3059999942779541,
+        0.04500000178813934,
+        0.010999999940395355
+      ],
+      [
+        -0.06300000101327896,
+        -0.5950000286102295,
+        0.3059999942779541,
+        1.0,
+        0.3160000145435333,
+        0.32100000977516174
+      ],
+      [
+        0.1809999942779541,
+        0.5640000104904175,
+        0.04500000178813934,
+        0.3160000145435333,
+        1.0,
+        -0.04399999976158142
+      ],
+      [
+        0.13500000536441803,
+        0.382999986410141,
+        0.010999999940395355,
+        0.32100000977516174,
+        -0.04399999976158142,
+        1.0
+      ]
+    ]
+  },
+  "notes": [
+    "Shares are of valid PR votes; turnout_valid = valid votes / registered voters.",
+    "votes = projected FINAL votes (counted + still to come); counted_votes / remaining_votes split them.",
+    "Counted VDs carry their actual result (p05 = p50 = p95). Projected VDs are posterior predictive draws.",
+    "With ward-level progress only, a partially counted ward = its counted votes + (1 - pct counted) x its projection; VD records stay projections for the whole VD.",
+    "Ward totals allocate a split VD's votes to wards by each piece's share of registered voters.",
+    "p_first = probability the party has the most PR votes in that unit."
+  ]
+}
