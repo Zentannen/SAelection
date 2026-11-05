@@ -1,0 +1,16 @@
+{
+  "_doc": "Prior for the 2026 Gauteng swing, used before any VDs are counted and as a weak prior afterwards (A_sd on the log-ratio scale; 0.35 ~ +/-35% relative uncertainty on each party's level). Once VDs are counted the swing is re-estimated from them and this prior matters less and less.",
+  "registered_growth_vs_2024": 1.04,
+  "_registered_growth_doc": "2026 roll / 2024 certified roll for Gauteng; only used while no VDs are counted (afterwards estimated from counted VDs). 1.04 is an assumption (~750k new registrations nationally in 2026).",
+  "prior": {
+    "name": "pre-election polls (average, wide)",
+    "valid_vote_shares": {"DA": 0.32, "ANC": 0.285, "ACTIONSA": 0.11, "MK": 0.08, "EFF": 0.075, "OTHER": 0.13},
+    "turnout": 0.43,
+    "A_sd": 0.35,
+    "sources": [
+      "Social Research Foundation, Q1 2026 Gauteng (registered voters): DA 37, ANC 31, ActionSA 7, EFF 5",
+      "eNCA/MarkData Gauteng: ANC 26, DA 27, ActionSA 15, MK 10, EFF 10",
+      "Turnout prior: 2021 LGE Gauteng PR valid-vote turnout 42.9% of registered"
+    ]
+  }
+}

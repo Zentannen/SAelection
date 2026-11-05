@@ -2,3 +2,10 @@ node_modules
 dist
 *.local
 .DS_Store
+.venv/
+__pycache__/
+*.pyc
+data/raw/
+data/geo/
+data/cache/
+artifacts/*.log
