@@ -1,0 +1,13 @@
+{
+  "id": "YOUR_KAGGLE_USERNAME/saelection-gauteng-2026",
+  "title": "SAelection Gauteng 2026",
+  "code_file": "saelection_gauteng_2026.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

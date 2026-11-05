@@ -1,0 +1,13 @@
+{
+  "_doc": "Ideological similarity between modelled parties (0 = unrelated, 1 = close substitutes). Non-zero pairs get cross-party 'substitution' coefficients (prior sd = 0.5 * similarity) linking a party's result to the past strength of similar parties. OTHER is mostly VF+, PA, ACDP, IFP, BOSA, RISE etc.",
+  "parties": ["DA", "ANC", "ACTIONSA", "MK", "EFF", "OTHER"],
+  "pairs": [
+    ["DA", "ACTIONSA", 1.0],
+    ["ANC", "MK", 1.0],
+    ["ANC", "EFF", 1.0],
+    ["MK", "EFF", 1.0],
+    ["DA", "OTHER", 0.5],
+    ["ACTIONSA", "OTHER", 0.5],
+    ["ANC", "OTHER", 0.25]
+  ]
+}
