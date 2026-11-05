@@ -26,7 +26,8 @@ PARTY_MAP = {
     "DEMOCRATIC ALLIANCE": "DA",
     "AFRICAN NATIONAL CONGRESS": "ANC",
     "ACTIONSA": "ACTIONSA",
-    "UMKHONTO WESIZWE": "MK",
+    "UMKHONTO WESIZWE": "MK",           # 2024 PE ballot name
+    "UMKHONTO WESIZWE PARTY": "MK",     # 2026 LGE ballot name
     "ECONOMIC FREEDOM FIGHTERS": "EFF",
 }
 
@@ -92,7 +93,7 @@ def load_results_file(path, kind: str = "LGE", key: str = "LGE2026") -> pd.DataF
                              errors="coerce").fillna(0).astype(np.int64)
     d = d[d["vd"] > 0]
     d["muni"] = d["Municipality"].str.split(" - ").str[0].str.strip()
-    d["cat"] = d["party"].str.strip().map(PARTY_MAP).fillna("OTHER")
+    d["cat"] = d["party"].str.strip().str.upper().map(PARTY_MAP).fillna("OTHER")
 
     meta = d.groupby("vd").agg(muni=("muni", "first"), ward=("ward", "first"),
                                registered=("registered", "first"), spoilt=("spoilt", "first"))

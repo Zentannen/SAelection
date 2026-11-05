@@ -122,11 +122,12 @@ def load_case(name: str) -> Case:
 
 
 def real2026_vds() -> np.ndarray:
-    """VD numbers counted in the 2026 snapshot(s) in data/observed_2026 (PR ballot, >0 votes)."""
+    """VD numbers counted in the first 2026 snapshot in data/observed_2026 (PR ballot, >0 votes).
+
+    Pinned to the earliest snapshot so the benchmark does not change as new snapshots arrive."""
     vds = set()
-    for f in sorted(REAL2026.glob("*.csv")):
-        if f.name.startswith("progress_"):
-            continue
+    files = sorted(f for f in REAL2026.glob("IEC_LGE2026_GP_*.csv"))
+    for f in files[:1]:
         df = pd.read_csv(f, encoding="utf-8-sig", usecols=["VotingDistrict", "BallotType", "TotalValidVotes"])
         df = df[df.BallotType == "PR"].groupby("VotingDistrict").TotalValidVotes.sum()
         vds |= set(df[df > 0].index.astype(np.int64))
