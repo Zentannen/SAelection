@@ -178,9 +178,9 @@ export default function App() {
         <header className="shrink-0 border-b bg-card/60 backdrop-blur">
           <div className="mx-auto flex max-w-[2560px] items-center justify-between gap-6 px-8 py-4">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Election predictions</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Gauteng 2026 local elections</h1>
               <p className="text-sm text-muted-foreground">
-                Forecast and live count, from the whole area down to each district and ward.
+                Forecast and live count (PR ballot), from all of Gauteng down to each municipality and ward.
                 {isSample && (
                   <span className="ml-2 text-amber-700 dark:text-amber-300">
                     Synthetic sample data: wards, districts, forecasts, past results and the count are all made up.
@@ -226,7 +226,8 @@ export default function App() {
           <PredictionOverview
             scope={scope}
             order={order}
-            title={focused ? `${focused.name} prediction` : "General prediction"}
+            title={focused ? `${focused.name} prediction` : "Gauteng prediction"}
+            council={!!focused}
             description={
               focused
                 ? `${focused.wardCount} wards · ${focused.municipalities.join(", ")}`

@@ -1,20 +1,15 @@
-// Display config per party code. The top ten parties get their own colour;
-// everyone else shares "Other". Ten hues can't all be told apart by colour
-// alone (especially with colour-blindness), so names are always shown next to
-// colours and the map legend can highlight one party's wards.
-// `ink` is the text colour for a label printed inside that party's fill.
+// Display config per party code. The Gauteng model forecasts five parties and
+// "Other": DA, ANC, ActionSA, MK and EFF get their own colour, every other party
+// is counted in "Other", in the forecast, the count and past results alike.
+// Names are always shown next to colours and the map legend can highlight one
+// party's wards. `ink` is the text colour for a label printed inside that party's fill.
 export const PARTIES: Record<string, { name: string; color?: string; ink?: string }> = {
-  // The ten largest parties (2024 national vote order) get their own colour.
-  ANC: { name: "African National Congress", color: "var(--party-anc)", ink: "#ffffff" },
+  // Order: 2026 Gauteng forecast, largest first.
   DA: { name: "Democratic Alliance", color: "var(--party-da)", ink: "#ffffff" },
-  MK: { name: "uMkhonto weSizwe", color: "var(--party-mk)", ink: "#ffffff" },
-  EFF: { name: "Economic Freedom Fighters", color: "var(--party-eff)", ink: "#ffffff" },
-  IFP: { name: "Inkatha Freedom Party", color: "var(--party-ifp)", ink: "#0b0b0b" },
-  PA: { name: "Patriotic Alliance", color: "var(--party-pa)", ink: "#ffffff" },
-  "FF+": { name: "Freedom Front Plus", color: "var(--party-ffplus)", ink: "#ffffff" },
+  ANC: { name: "African National Congress", color: "var(--party-anc)", ink: "#ffffff" },
   ActionSA: { name: "ActionSA", color: "var(--party-actionsa)", ink: "#0b0b0b" },
-  ACDP: { name: "African Christian Democratic Party", color: "var(--party-acdp)", ink: "#ffffff" },
-  UDM: { name: "United Democratic Movement", color: "var(--party-udm)", ink: "#0b0b0b" },
+  EFF: { name: "Economic Freedom Fighters", color: "var(--party-eff)", ink: "#ffffff" },
+  MK: { name: "uMkhonto weSizwe", color: "var(--party-mk)", ink: "#ffffff" },
 }
 
 export const OTHER = "Other"

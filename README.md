@@ -1,11 +1,11 @@
-# SA Election — Predictions by District and Ward
+# Gauteng 2026 — Predictions by District and Ward
 
-A web app for following a municipal election forecast against the live count, at three levels: the **general prediction** for the whole area, each **district**, and each **ward**.
+A web app for following the 2026 local government election forecast for **Gauteng** against the live count, at three levels: the **Gauteng prediction**, each **district** (the three metros, Sedibeng and West Rand), and each of the 526 **wards**.
 
 ## What it is
 
-- **General prediction.** The headline panel shows:
-  - the predicted largest party, its vote share, and whether it has an outright majority
+- **Gauteng prediction.** The headline panel shows:
+  - the predicted largest party and its vote share (whether it has an outright majority is shown only for a district: councils are elected per municipality, so there is no Gauteng-wide majority)
   - predicted vote share against the votes counted so far, as two stacked bars split by party
   - wards reporting, how often the prediction is holding, upsets, and most predicted ward wins
 
@@ -15,7 +15,7 @@ A web app for following a municipal election forecast against the live count, at
 - **Hover card.** Hovering a ward shows its count status, votes and turnout, whether the leader matches the prediction, and each party's current share with a tick at its predicted share.
 - **Ward panel.** Clicking a ward opens its panel and zooms to its district. The panel has:
   - the current result against the prediction
-  - **Vote share across elections:** past results (sample: 2016, 2021) as a solid line, continuing as a dashed line to the 2026 forecast (hollow dot), with the 2026 count so far as a filled dot
+  - **Vote share across elections:** past results (2016 local, 2019 provincial, 2021 local, 2024 provincial) as a solid line, continuing as a dashed line to the 2026 forecast (hollow dot), with the 2026 count so far as a filled dot
   - **Election night count:** each party's running vote share at each results update
 
   Lines are smooth curves that pass through every real data point.
@@ -48,11 +48,26 @@ npm run dev
 |---|---|
 | `npm run build` | Type-checks and builds to `dist/` |
 | `npm run preview` | Serves the production build |
-| `npm run generate:sample` | Regenerates the synthetic sample data (`-- --wards 300 --seed 3` to vary it) |
+| `npm run generate:sample` | Overwrites `public/data/` with synthetic sample data (`-- --wards 300 --seed 3` to vary it) |
 
 ## Data
 
-The app reads four static files from `public/data/`. **The files in the repo now are synthetic sample data.** The ward shapes, districts, predictions, past results and count are all made up, and the app shows a "Sample data" banner while they're in use.
+The app reads four static files from `public/data/`. They hold the real 2026 Gauteng data, built from the projection model on the `main` branch:
+
+```bash
+python3 scripts/build_gauteng_data.py <checkout-of-main> public/data
+```
+
+| File | From `main` |
+|---|---|
+| `wards.geojson` | `output/frontend/wards.geojson`, with each municipality's district added |
+| `predictions.json` | `output/frontend/predictions.json` (ward forecasts), plus the model's own Gauteng and district figures from `output/live/{province,municipalities}.json` |
+| `results.json` | `output/frontend/results.json` (IEC dashboard count, PR-equivalent votes) |
+| `history.json` | `data/processed/vd_history_gauteng.csv`, moved onto the 2026 wards with `vd_ward_crosswalk_2026.csv` |
+
+Everything is on the PR ballot and in the model's six groups: **DA, ANC, ActionSA, MK, EFF and Other**, so the forecast, the count and past results compare like for like. Past results are the 2016 and 2021 local elections (PR ballot) and the 2019 and 2024 **Gauteng provincial** ballots, the same four elections the model is trained on. Re-run the build after each new model run (`scripts/update_live.sh` on `main`).
+
+`npm run generate:sample` overwrites these files with synthetic data (the app then shows a "Sample data" banner).
 
 ### `wards.geojson`: ward boundaries (and districts)
 
@@ -118,15 +133,16 @@ Ward boundaries change between elections, so past results must be mapped onto **
 
 ## Party colours
 
-Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). Only the main ward-winning parties (ANC, DA, EFF, MK, IFP, ActionSA) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, because eight colours can't all be told apart reliably, especially by colour-blind readers. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
+Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). The five parties the Gauteng model forecasts (DA, ANC, ActionSA, EFF, MK) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, matching the model's "Other" group. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
 
-The ANC, DA, EFF, MK and IFP colours follow each party's usual colour and ActionSA is shown in teal; all were adjusted in lightness to stay distinguishable and were checked with a colour-blindness validator. The closest pair is MK and ANC for red-blind (protan) readers, which is acceptable only because names are always shown alongside. Re-check if you change the colours.
+The DA, ANC, EFF and MK colours follow each party's usual colour and ActionSA is shown in teal; all were adjusted in lightness to stay distinguishable and were checked with a colour-blindness validator. The closest pair is MK and ANC for red-blind (protan) readers, which is acceptable only because names are always shown alongside. Re-check if you change the colours.
 
 ## Project layout
 
 ```
 public/data/                 wards.geojson, predictions.json, results.json, history.json
-scripts/generate-sample-data.mjs
+scripts/build_gauteng_data.py     builds public/data/ from the model output on main
+scripts/generate-sample-data.mjs  synthetic sample data
 src/
   App.tsx                    layout, district selection, colour-by toggle, side panel tabs
   data.ts                    loading + ring-winding fix
