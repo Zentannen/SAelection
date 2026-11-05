@@ -137,6 +137,10 @@ Vote share per ward in earlier elections, oldest first. Leave a party out of an 
 
 Ward boundaries change between elections, so past results must be mapped onto **today's** wards before they go in this file. One way is to re-aggregate voting-district results by which current ward each voting station falls in.
 
+## Coalition scenario plan
+
+The app's **Coalition scenarios** view (header switch, or `/#scenarios`) shows the playbook: a Gauteng table from vote-share bands to likely governments, nine configurations with foreign cases drawn as vote-share bars, party archetypes, regularities, national pressure and the province. Its content lives in `src/scenarios.ts`; the long-form version is [`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md), a coalition scenario playbook built from comparative cases, mostly Central and Eastern Europe. It sets out what governments formed under different vote-share configurations and party values, how long they lasted and why, then maps those patterns onto Johannesburg, Tshwane, Ekurhuleni and the Gauteng provincial government.
+
 ## Party colours
 
 Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). The five parties the Gauteng model forecasts (DA, ANC, ActionSA, EFF, MK) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, matching the model's "Other" group. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
@@ -150,7 +154,9 @@ public/data/                 wards.geojson, predictions.json, results.json, hist
 scripts/build_gauteng_data.py     builds public/data/ from the model output on main
 scripts/generate-sample-data.mjs  synthetic sample data
 src/
-  App.tsx                    layout, district selection, colour-by toggle, side panel tabs
+  App.tsx                    view switch (ward map / coalition scenarios), kept in the URL hash
+  map-app.tsx                ward map page: layout, district selection, colour-by toggle, side panel tabs
+  scenarios.ts               coalition scenario content and foreign cases
   data.ts                    loading + ring-winding fix
   lib/model.ts               ward summaries, area/district roll-ups, 60s results polling
   lib/geo.ts                 district borders derived from ward topology
@@ -159,6 +165,8 @@ src/
     prediction-overview.tsx  general / district prediction panel
     district-list.tsx        district comparison list
     ward-map.tsx             SVG map: ward + district borders, labels, pan/zoom, focus
+    scenarios-view.tsx       coalition scenarios page
+    vote-bar.tsx             vote-share bar coloured by role in government
     ward-hover-card.tsx      hover card (current result vs prediction)
     ward-detail.tsx          ward panel
     ward-charts.tsx          vote share across elections + election-night count charts
