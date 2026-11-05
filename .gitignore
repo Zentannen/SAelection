@@ -9,3 +9,7 @@ data/raw/
 data/geo/
 data/cache/
 artifacts/*.log
+.env
+.env.*
+*.pem
+kaggle.json
