@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+from functools import partial
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -164,6 +165,16 @@ def calibrate_A(F, R, h, d, shares, turnout, rng, n_mc=60, iters=40):
     return A
 
 
+def _live_init(site=None, A_loc=None):
+    if site is None:
+        return partial(_live_init, A_loc=A_loc)
+    if site["name"] == "A":
+        return jnp.asarray(A_loc, jnp.float32)
+    if site["name"] in ("phi", "psi", "d_raw"):
+        return jnp.zeros(site["fn"].shape(), jnp.float32)
+    return numpyro.infer.init_to_median(site)
+
+
 def aggregate_observations(aggs, h):
     """aggs: list of dicts {W: (n,) VD weights of the unit, f: fraction of the unit's VDs counted,
     n_counted: VDs counted, counts: (6,) counted valid votes, abstain: counted registered - valid or None}.
@@ -237,15 +248,7 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
             ao = aggregate_observations(aggs, h)
             kw.update({k: jnp.asarray(x, jnp.float32 if x.dtype == float else x.dtype) for k, x in ao.items()})
 
-        def init(site=None):
-            if site is None:
-                return init
-            if site["name"] == "A":
-                return jnp.asarray(A_loc, jnp.float32)
-            return jnp.zeros(site["fn"].shape(), jnp.float32) if site["name"] in ("phi", "psi", "d_raw") \
-                else numpyro.infer.init_to_median(site)
-
-        guide = AutoNormal(live_model, init_loc_fn=init, init_scale=0.02)
+        guide = AutoNormal(live_model, init_loc_fn=partial(_live_init, A_loc=A_loc), init_scale=0.02)
         opt = optax.adam(optax.cosine_decay_schedule(0.02, vi_steps, alpha=0.02))
         res = SVI(live_model, guide, opt, Trace_ELBO()).run(jax.random.PRNGKey(seed), vi_steps,
                                                             progress_bar=False, **kw)
