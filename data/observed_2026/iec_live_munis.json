@@ -1,67 +1,67 @@
 [
   {
     "muni": "EKU",
-    "report_date": "2026-11-05T12:56:30.3165691+02:00",
+    "report_date": "2026-11-05T13:21:51.0421134+02:00",
     "vd_expected": 653,
-    "vds_complete": 151,
+    "vds_complete": 154,
     "pct_vds_complete": 23.0,
     "registered_2026": 1711998,
-    "ballots_per_voter": 1.9975,
-    "pr_valid": 159111,
+    "ballots_per_voter": 1.9981,
+    "pr_valid": 168476,
     "pr_by_party": {
-      "DA": 60197,
-      "ANC": 27970,
-      "ACTIONSA": 28574,
-      "MK": 8759,
-      "EFF": 8142,
-      "OTHER": 25469
+      "DA": 62557,
+      "ANC": 30323,
+      "ACTIONSA": 30488,
+      "MK": 9705,
+      "EFF": 8915,
+      "OTHER": 26488
     },
-    "spoilt": 5397,
-    "special_votes": 11131
+    "spoilt": 5751,
+    "special_votes": 11952
   },
   {
     "muni": "JHB",
-    "report_date": "2026-11-05T12:57:00.5831314+02:00",
+    "report_date": "2026-11-05T13:21:54.1466033+02:00",
     "vd_expected": 862,
-    "vds_complete": 146,
-    "pct_vds_complete": 16.0,
+    "vds_complete": 150,
+    "pct_vds_complete": 17.0,
     "registered_2026": 2417915,
-    "ballots_per_voter": 1.9999,
-    "pr_valid": 163018,
+    "ballots_per_voter": 2.0003,
+    "pr_valid": 179231,
     "pr_by_party": {
-      "DA": 63562,
-      "ANC": 28872,
-      "ACTIONSA": 27968,
-      "MK": 6851,
-      "EFF": 11212,
-      "OTHER": 24553
+      "DA": 69767,
+      "ANC": 31389,
+      "ACTIONSA": 31051,
+      "MK": 7673,
+      "EFF": 11915,
+      "OTHER": 27436
     },
-    "spoilt": 3649,
-    "special_votes": 9437
+    "spoilt": 3925,
+    "special_votes": 10270
   },
   {
     "muni": "TSH",
-    "report_date": "2026-11-05T12:57:06.753905+02:00",
+    "report_date": "2026-11-05T13:21:54.1537328+02:00",
     "vd_expected": 796,
-    "vds_complete": 168,
+    "vds_complete": 173,
     "pct_vds_complete": 21.0,
     "registered_2026": 1684463,
-    "ballots_per_voter": 1.9974,
-    "pr_valid": 123851,
+    "ballots_per_voter": 1.9973,
+    "pr_valid": 135227,
     "pr_by_party": {
-      "DA": 36354,
-      "ANC": 27020,
-      "ACTIONSA": 32647,
-      "MK": 2611,
-      "EFF": 7217,
-      "OTHER": 18002
+      "DA": 40146,
+      "ANC": 29385,
+      "ACTIONSA": 35381,
+      "MK": 2851,
+      "EFF": 7756,
+      "OTHER": 19708
     },
-    "spoilt": 4062,
-    "special_votes": 8740
+    "spoilt": 4438,
+    "special_votes": 10061
   },
   {
     "muni": "GT421",
-    "report_date": "2026-11-05T12:57:14.3502374+02:00",
+    "report_date": "2026-11-05T13:21:58.6111211+02:00",
     "vd_expected": 168,
     "vds_complete": 4,
     "pct_vds_complete": 2.0,
@@ -81,7 +81,7 @@
   },
   {
     "muni": "GT422",
-    "report_date": "2026-11-05T12:57:16.2705221+02:00",
+    "report_date": "2026-11-05T13:22:00.029572+02:00",
     "vd_expected": 39,
     "vds_complete": 21,
     "pct_vds_complete": 53.0,
@@ -101,7 +101,7 @@
   },
   {
     "muni": "GT423",
-    "report_date": "2026-11-05T12:57:16.5348251+02:00",
+    "report_date": "2026-11-05T13:22:01.0098807+02:00",
     "vd_expected": 40,
     "vds_complete": 22,
     "pct_vds_complete": 55.0,
@@ -121,62 +121,62 @@
   },
   {
     "muni": "GT481",
-    "report_date": "2026-11-05T12:57:16.2379218+02:00",
+    "report_date": "2026-11-05T13:22:00.9766817+02:00",
     "vd_expected": 115,
-    "vds_complete": 56,
-    "pct_vds_complete": 48.0,
+    "vds_complete": 58,
+    "pct_vds_complete": 50.0,
     "registered_2026": 202233,
-    "ballots_per_voter": 1.9953,
-    "pr_valid": 45103,
+    "ballots_per_voter": 1.9951,
+    "pr_valid": 48231,
     "pr_by_party": {
-      "DA": 19994,
-      "ANC": 9764,
-      "ACTIONSA": 3571,
-      "MK": 1213,
-      "EFF": 2645,
-      "OTHER": 7916
+      "DA": 21056,
+      "ANC": 10829,
+      "ACTIONSA": 3815,
+      "MK": 1327,
+      "EFF": 2910,
+      "OTHER": 8294
     },
-    "spoilt": 960,
-    "special_votes": 4992
+    "spoilt": 1049,
+    "special_votes": 5361
   },
   {
     "muni": "GT484",
-    "report_date": "2026-11-05T12:57:16.4074511+02:00",
+    "report_date": "2026-11-05T13:21:59.9744016+02:00",
     "vd_expected": 77,
-    "vds_complete": 21,
-    "pct_vds_complete": 27.0,
+    "vds_complete": 22,
+    "pct_vds_complete": 28.0,
     "registered_2026": 98869,
-    "ballots_per_voter": 2.0041,
-    "pr_valid": 6643,
+    "ballots_per_voter": 2.0032,
+    "pr_valid": 7300,
     "pr_by_party": {
-      "DA": 2196,
-      "ANC": 1895,
-      "ACTIONSA": 239,
-      "MK": 352,
-      "EFF": 478,
-      "OTHER": 1483
+      "DA": 2212,
+      "ANC": 2127,
+      "ACTIONSA": 251,
+      "MK": 409,
+      "EFF": 575,
+      "OTHER": 1726
     },
-    "spoilt": 387,
-    "special_votes": 569
+    "spoilt": 407,
+    "special_votes": 689
   },
   {
     "muni": "GT485",
-    "report_date": "2026-11-05T12:57:23.0407995+02:00",
+    "report_date": "2026-11-05T13:22:04.2016316+02:00",
     "vd_expected": 86,
-    "vds_complete": 48,
-    "pct_vds_complete": 55.0,
+    "vds_complete": 50,
+    "pct_vds_complete": 58.0,
     "registered_2026": 142004,
-    "ballots_per_voter": 1.9944,
-    "pr_valid": 33893,
+    "ballots_per_voter": 1.9951,
+    "pr_valid": 36578,
     "pr_by_party": {
-      "DA": 10393,
-      "ANC": 9864,
-      "ACTIONSA": 2356,
-      "MK": 2167,
-      "EFF": 3011,
-      "OTHER": 6102
+      "DA": 10733,
+      "ANC": 10668,
+      "ACTIONSA": 2731,
+      "MK": 2487,
+      "EFF": 3360,
+      "OTHER": 6599
     },
-    "spoilt": 1067,
-    "special_votes": 3786
+    "spoilt": 1091,
+    "special_votes": 4014
   }
 ]

@@ -32,8 +32,11 @@
 - `scripts/update_live.sh` = fetch → project → export `output/frontend/` for the map app.
 - First run (12:57 data, 22% of VDs): DA 35.7%, ANC 22.6%, Other 15.3%, ActionSA 14.9%, EFF 6.7%, MK 4.8%;
   turnout ~53% of registered (counted VDs: 52.7% vs 45.3% in the same VDs in 2021).
-- Known: 90% intervals look too narrow (fixed structural params + mean-field VI); a reduced count-replay
-  backtest (`artifacts/backtest_summary.csv`) checks coverage — inflate if coverage < 90%.
+- Calibration (count-replay on 2024, `artifacts/backtest_summary.csv`, VD mode, 10%/25% counted):
+  projection error vs running-tally error — random order 0.37 vs 0.52/0.33 pp (90% coverage 100%);
+  ANC-strongholds-first 1.7–2.2 vs 9.2–9.9 pp (coverage 67%); DA-first 2.4–2.9 vs 12.9–14.8 pp (67%).
+  Discrepancy sd = 0.06 + 0.08 x (counted-vs-uncounted gap in past party strength); slopes fixed (freeing
+  them made stronghold-first worse). Ward-progress mode not backtested yet.
 - 88 VDs exist only in the live feed (new 2026 VDs): their counted votes are added at ward level.
 
 ## IEC 2026 live data (older notes)

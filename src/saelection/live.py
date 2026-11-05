@@ -98,8 +98,18 @@ def merged_hyper(sources=("T1", "T2")):
     return out
 
 
-def fixed_effects(d: Design, h) -> np.ndarray:
-    return h["b1"] * d.X1 + h["b2"] * d.X2 + d.X1 @ h["C1"].T + d.X2 @ h["C2"].T
+def fixed_effects(d: Design, h, slopes=True) -> np.ndarray:
+    cross = d.X1 @ h["C1"].T + d.X2 @ h["C2"].T
+    return cross + (h["b1"] * d.X1 + h["b2"] * d.X2 if slopes else 0.0)
+
+
+# Live-count calibration (tuned on the 2024 count-replay backtest, artifacts/backtest_summary.csv)
+B_SD = 0.02          # prior sd of past-performance slopes around their trained values (freeing them
+                     # further made stronghold-first counts extrapolate worse in the backtest)
+KAPPA_PROV = 0.06    # model-discrepancy sd (log-ratio) shared by all uncounted VDs ...
+KAPPA_GAMMA = 0.08   # ... plus this times the gap in past party strength between counted and
+                     # uncounted VDs (an unrepresentative count leaves more room for surprise)
+KAPPA_MUNI = 0.06    # municipal discrepancy sd for uncounted VDs
 
 
 # ----------------------------------------------------------------------------- live model
@@ -108,7 +118,7 @@ def _softmax_abstain_j(eta):
     return jax.nn.softmax(e, axis=-1)
 
 
-def live_model(F, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd, R,
+def live_model(F, X1, X2, b1_loc, b2_loc, b_sd, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd, R,
                z=None, v=None, obs_mask=None,
                agg_W=None, agg_z=None, agg_v=None, agg_num=None, agg_ref=None, agg_mask=None):
     """VD-level counts enter through z (alr of the VD result); ward / municipal partial counts
@@ -118,6 +128,9 @@ def live_model(F, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd,
     n = F.shape[0]
     J = K + 1
     A = numpyro.sample("A", dist.Normal(A_loc, A_sd).to_event(1))
+    # past-performance slopes re-estimated from the count (differential swing), around training values
+    b1 = numpyro.sample("b1", dist.Normal(b1_loc, b_sd).to_event(1))
+    b2 = numpyro.sample("b2", dist.Normal(b2_loc, b_sd).to_event(1))
     d_raw = numpyro.sample("d_raw", dist.Normal(0.0, 1.0).expand([n_muni, K]).to_event(2))
     phi = numpyro.sample("phi", dist.ImproperUniform(dist.constraints.real_vector, (), (n, J)))
     diff2 = jnp.sum((phi[edges[:, 0]] - phi[edges[:, 1]]) ** 2, axis=0)
@@ -125,7 +138,7 @@ def live_model(F, muni, n_muni, edges, sig_d, sigma, lam, on, Lcov, A_loc, A_sd,
     numpyro.factor("car", -0.5 * jnp.sum(quad))
     psi = numpyro.sample("psi", dist.MultivariateNormal(jnp.zeros(K), scale_tril=Lcov).expand([n]).to_event(1))
     phi = phi * on
-    eta = A + d_raw[muni] * sig_d + F + phi[:, :K] + phi[:, K:] + psi
+    eta = A + d_raw[muni] * sig_d + F + b1 * X1 + b2 * X2 + phi[:, :K] + phi[:, K:] + psi
     if z is not None:
         with numpyro.handlers.mask(mask=obs_mask):
             numpyro.sample("z", dist.Normal(eta, jnp.sqrt(v)), obs=z)
@@ -230,12 +243,17 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
     J = K + 1
     if counted.sum() == 0 and not aggs:
         A = A_loc + rng.standard_normal((S, K)) * A_sd
+        b1 = h["b1"] + rng.standard_normal((S, K)) * B_SD
+        b2 = h["b2"] + rng.standard_normal((S, K)) * B_SD
         delta = rng.standard_normal((S, len(d.muni_codes), K)) * h["sig_d"]
         phi = sample_car(np.tile(h["sigma"], (S, 1)), np.tile(lam_eff, (S, 1)), d.edges, d.n, rng)
         info = {"method": "prior simulation (nothing counted yet)"}
     else:
         z, v = alr(Yobs), alr_var(Yobs)
-        kw = dict(F=jnp.asarray(F, jnp.float32), muni=jnp.asarray(d.muni), n_muni=len(d.muni_codes),
+        kw = dict(F=jnp.asarray(fixed_effects(d, h, slopes=False), jnp.float32),
+                  X1=jnp.asarray(d.X1, jnp.float32), X2=jnp.asarray(d.X2, jnp.float32),
+                  b1_loc=jnp.asarray(h["b1"], jnp.float32), b2_loc=jnp.asarray(h["b2"], jnp.float32),
+                  b_sd=float(B_SD), muni=jnp.asarray(d.muni), n_muni=len(d.muni_codes),
                   edges=jnp.asarray(d.edges),
                   sig_d=jnp.asarray(h["sig_d"], jnp.float32), sigma=jnp.asarray(h["sigma"], jnp.float32),
                   lam=jnp.asarray(lam_eff, jnp.float32), on=jnp.asarray(h["spatial"], jnp.float32), Lcov=jnp.asarray(h["Lcov"], jnp.float32),
@@ -254,6 +272,7 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
                                                             progress_bar=False, **kw)
         post = guide.sample_posterior(jax.random.PRNGKey(seed + 1), res.params, sample_shape=(S,))
         A = np.asarray(post["A"])
+        b1, b2 = np.asarray(post["b1"]), np.asarray(post["b2"])
         delta = np.asarray(post["d_raw"]) * h["sig_d"]
         phi = np.asarray(post["phi"]).copy()
         if counted.any() and not aggs:
@@ -267,14 +286,30 @@ def project(d: Design, h, R, observed: dict, prior: dict, n_draws=500, seed=0, v
     phi = phi * h["spatial"].astype(float)              # fields switched off contribute nothing
     # VD-specific party residuals of uncounted VDs are not informed by any data: exact prior
     psi = rng.standard_normal((S, d.n, K)) @ h["Lcov"].T
-    eta = A[:, None, :] + delta[:, d.muni, :] + F[None] + phi[..., :K] + phi[..., K:] + psi
+    F0 = fixed_effects(d, h, slopes=False)
+    eta = (A[:, None, :] + delta[:, d.muni, :] + F0[None] + b1[:, None, :] * d.X1 + b2[:, None, :] * d.X2
+           + phi[..., :K] + phi[..., K:] + psi)
+    # model discrepancy for VDs still to come: a shared provincial + municipal shift that the
+    # model structure cannot see (e.g. late-counting areas swinging differently)
+    unc = ~counted
+    gap = np.zeros(K)
+    if counted.any() and unc.any():
+        Xb = 0.5 * (d.X1 + d.X2)
+        gap = np.abs(np.average(Xb[counted], 0, R[counted]) - np.average(Xb[unc], 0, R[unc]))
+    kprov = KAPPA_PROV + KAPPA_GAMMA * gap
+    disc = (rng.standard_normal((S, 1, K)) * kprov
+            + (rng.standard_normal((S, len(d.muni_codes), K)) * KAPPA_MUNI)[:, d.muni, :])
+    eta[:, unc, :] += disc[:, unc, :] if disc.shape[1] > 1 else disc
     p = _softmax_abstain(eta)
     votes = np.empty((S, d.n, len(CATS)), np.int64)
     Rn = np.round(R).astype(np.int64)
     for s in range(S):
         votes[s] = rng.multinomial(Rn, p[s])
     votes[:, counted, :] = Yobs[counted].astype(np.int64)[None]
-    info.update(A_prior_mean=A_loc.round(3).tolist(), A_post_mean=A.mean(0).round(3).tolist())
+    info.update(A_prior_mean=A_loc.round(3).tolist(), A_post_mean=A.mean(0).round(3).tolist(),
+                b1_post_mean=b1.mean(0).round(3).tolist(), b2_post_mean=b2.mean(0).round(3).tolist(),
+                calibration={"b_sd": B_SD, "kappa_prov": kprov.round(3).tolist(), "kappa_muni": KAPPA_MUNI,
+                             "counted_vs_uncounted_gap": gap.round(3).tolist()})
     return votes, counted, info
 
 
