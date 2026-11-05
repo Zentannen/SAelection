@@ -377,22 +377,27 @@ def flat_table(recs):
 
 
 # ----------------------------------------------------------------------------- main entry
-def project_with_method(method: str, d: Design, seed=0):
+def project_with_method(method: str, d: Design, seed=0, augment: bool = False):
     """Project with a benchmarked method (saelection.bench, 'module:function') instead of the
     Bayesian model. Uses the same live case the live check scores methods on, so the projection
     shipped is exactly the one that was validated. Returns (votes (S, n, 7), counted, info)."""
     from .bench.harness import resolve
     from .bench.live_check import load_live_case
-    case, arrival, files = load_live_case()
-    if not np.array_equal(case.vd, d.vd):
+    case, arrival, files = load_live_case(augment=augment)
+    n = d.n
+    if not np.array_equal(case.vd[:n], d.vd):
         raise ValueError("live case VD order differs from the design")
     counted = arrival >= 0
     label, fn = resolve(method)
     proj = fn(case, counted, np.random.default_rng(seed))
     V = proj.draws if proj.draws is not None else proj.vd_mean[None]
+    # augmented rows (counted VDs outside the boundary set) only inform the projection; their
+    # actual votes are added to their wards by run(), as without augmentation
+    V, counted = V[:, :n], counted[:n]
     votes = np.rint(np.clip(V, 0, None)).astype(np.int64)
-    votes[:, counted, :] = np.rint(case.Y[counted]).astype(np.int64)[None]
+    votes[:, counted, :] = np.rint(case.Y[:n][counted]).astype(np.int64)[None]
     info = {"method": f"bench method {method}", "n_vd_observations": int(counted.sum()),
+            "new_vds_as_observations": int(case.n - n),
             "n_draws": int(votes.shape[0]), "method_info": proj.info or {}}
     return votes, counted, info
 
@@ -483,7 +488,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
         if aggs:
             warnings.append("progress_*.csv rows are ignored when a bench method is used")
             aggs, agg_units = [], []
-        votes, counted, info = project_with_method(method, d, seed=seed)
+        votes, counted, info = project_with_method(method, d, seed=seed, augment=bool(cfg.get("augment_new_vds", False)))
     else:
         votes, counted, info = project(d, h, R, observed, prior, n_draws=n_draws, seed=seed, aggs=aggs)
     S = votes.shape[0]
