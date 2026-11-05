@@ -54,7 +54,7 @@ const nearest = (list, [x, y]) =>
     const dist = ((x - d.seed[0]) / (BOX.east - BOX.west)) ** 2 + ((y - d.seed[1]) / (BOX.north - BOX.south)) ** 2;
     return dist < best.dist ? { d, dist } : best;
   }, { d: list[0], dist: Infinity }).d;
-const PARTIES = ['ANC', 'DA', 'EFF', 'MK', 'IFP', 'PA', 'ActionSA', 'FF+'];
+const PARTIES = ['ANC', 'DA', 'EFF', 'MK', 'IFP', 'PA', 'ActionSA', 'FF+', 'ACDP', 'UDM'];
 
 // Each party gets a few "strongholds"; support decays with distance from them.
 const strongholds = Object.fromEntries(

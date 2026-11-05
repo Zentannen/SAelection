@@ -31,10 +31,12 @@ interface Props {
   description: string
   /** Bucketed party order shared by every segmented bar on the page. */
   order: string[]
+  /** true when the scope elects its own council, so an outright majority means something. */
+  council?: boolean
 }
 
 /** Headline prediction for the whole area, or for one district when it is selected. */
-export function PredictionOverview({ scope, title, description, order }: Props) {
+export function PredictionOverview({ scope, title, description, order, council = true }: Props) {
   const predicted = ranked(scope.predictedShares)
   const [leader, leaderShare = 0] = predicted[0] ?? []
   const [runnerUp, runnerUpShare = 0] = predicted[1] ?? []
@@ -64,9 +66,15 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
                 </div>
                 <p className="text-5xl font-semibold tracking-tight">{leaderShare.toFixed(1)}%</p>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <Badge variant={majority ? "default" : "secondary"}>
-                    {majority ? "Outright majority" : "No outright majority"}
-                  </Badge>
+                  {council ? (
+                    <Badge variant={majority ? "default" : "secondary"}>
+                      {majority ? "Outright majority" : "No outright majority"}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" title="Councils are elected per municipality; there is no Gauteng-wide council">
+                      Province-wide share
+                    </Badge>
+                  )}
                   {runnerUp && (
                     <span>
                       {(leaderShare - runnerUpShare).toFixed(1)} pts ahead of {runnerUp}

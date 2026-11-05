@@ -16,7 +16,8 @@ import { WardHoverCard } from "@/components/ward-hover-card"
 import { WardMap, type HoverEvent, type WardFill } from "@/components/ward-map"
 import { ranked } from "@/data"
 import { useElectionData, type WardSummary } from "@/lib/model"
-import { MAIN_PARTIES, OTHER, OTHER_COLOR, partyColor, partyName } from "@/parties"
+import { cn } from "@/lib/utils"
+import { MAIN_PARTIES, OTHER, OTHER_COLOR, colourBucket, partyColor, partyName } from "@/parties"
 
 type ColourBy = "prediction" | "result"
 type Panel = "districts" | "parties" | "upsets" | "ward"
@@ -24,50 +25,79 @@ type Panel = "districts" | "parties" | "upsets" | "ward"
 const ALL = "__all"
 const NO_DATA: WardFill = { color: "var(--muted)", opacity: 1 }
 
-function fillFor(w: WardSummary | undefined, by: ColourBy): WardFill {
+function fillFor(w: WardSummary | undefined, by: ColourBy, party: string | null): WardFill {
   if (!w) return NO_DATA
+  const winner = by === "prediction" ? w.predictedWinner : w.leader
+  if (!winner) return NO_DATA
+  // A highlighted party: its wards keep their colour, every other ward goes grey.
+  if (party && colourBucket(winner) !== party) return NO_DATA
   if (by === "prediction") {
-    if (!w.predictedWinner) return NO_DATA
     const conf = Math.max(0, Math.min(1, w.confidence ?? 0.8))
-    return { color: partyColor(w.predictedWinner), opacity: 0.3 + 0.7 * conf }
+    return { color: partyColor(winner), opacity: 0.3 + 0.7 * conf }
   }
-  if (!w.leader) return NO_DATA
-  return { color: partyColor(w.leader), opacity: w.status === "final" ? 1 : 0.5 }
+  return { color: partyColor(winner), opacity: w.status === "final" ? 1 : 0.5 }
 }
 
-function MapLegend({ by }: { by: ColourBy }) {
+function MapLegend({
+  by,
+  active,
+  pinned,
+  onHover,
+  onToggle,
+}: {
+  by: ColourBy
+  active: string | null
+  pinned: string | null
+  onHover: (party: string | null) => void
+  onToggle: (party: string) => void
+}) {
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-      {MAIN_PARTIES.map((p) => (
-        <span key={p} className="flex items-center gap-1.5" title={partyName(p)}>
-          <span className="size-2.5 rounded-[3px]" style={{ background: partyColor(p) }} />
-          <span className="text-foreground">{p}</span>
-        </span>
-      ))}
-      <span className="flex items-center gap-1.5">
-        <span className="size-2.5 rounded-[3px]" style={{ background: OTHER_COLOR }} />
-        Other
-      </span>
-      {by === "result" && (
+    <div className="grid gap-2.5">
+      <div className="flex flex-wrap items-center gap-1.5" onMouseLeave={() => onHover(null)}>
+        {[...MAIN_PARTIES, OTHER].map((p) => (
+          <button
+            key={p}
+            type="button"
+            aria-pressed={pinned === p}
+            title={`${partyName(p)}: ${pinned === p ? "click to clear" : "hover or click to highlight its wards"}`}
+            onMouseEnter={() => onHover(p)}
+            onFocus={() => onHover(p)}
+            onBlur={() => onHover(null)}
+            onClick={() => onToggle(p)}
+            className={cn(
+              "flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-[opacity,background-color] outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              pinned === p && "border-foreground/50 bg-accent",
+              active && active !== p && "opacity-40",
+            )}
+          >
+            <span className="size-2.5 rounded-[3px]" style={{ background: p === OTHER ? OTHER_COLOR : partyColor(p) }} />
+            {p}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+        <span>{pinned ? `Showing ${partyName(pinned)} wards · click again to clear` : "Hover or click a party to highlight its wards"}</span>
+        {by === "result" && (
+          <span className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-[3px] border bg-muted" />
+            No results yet
+          </span>
+        )}
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-[3px] border bg-muted" />
-          No results yet
+          <svg width="18" height="10" aria-hidden>
+            <line x1="0" y1="5" x2="18" y2="5" stroke="var(--district-boundary)" strokeWidth="2.25" strokeLinecap="round" />
+          </svg>
+          District border
         </span>
-      )}
-      <span className="flex items-center gap-1.5">
-        <svg width="18" height="10" aria-hidden>
-          <line x1="0" y1="5" x2="18" y2="5" stroke="var(--district-boundary)" strokeWidth="2.25" strokeLinecap="round" />
-        </svg>
-        District border
-      </span>
-      <span className="ml-auto flex items-center gap-2">
-        {by === "prediction" ? "Less → more confident" : "Counting → final"}
-        <span className="flex h-2.5 w-16 overflow-hidden rounded-[3px]">
-          {(by === "prediction" ? [0.35, 0.6, 0.8, 1] : [0.5, 1]).map((o) => (
-            <span key={o} className="flex-1 bg-foreground" style={{ opacity: o }} />
-          ))}
+        <span className="ml-auto flex items-center gap-2">
+          {by === "prediction" ? "Less → more confident" : "Counting → final"}
+          <span className="flex h-2.5 w-16 overflow-hidden rounded-[3px]">
+            {(by === "prediction" ? [0.35, 0.6, 0.8, 1] : [0.5, 1]).map((o) => (
+              <span key={o} className="flex-1 bg-foreground" style={{ opacity: o }} />
+            ))}
+          </span>
         </span>
-      </span>
+      </div>
     </div>
   )
 }
@@ -84,9 +114,12 @@ export default function App() {
   const [panel, setPanel] = useState<Panel>("districts")
   const [hover, setHover] = useState<HoverEvent | null>(null)
   const [tableHoverId, setTableHoverId] = useState<string | null>(null)
+  const [hoverParty, setHoverParty] = useState<string | null>(null)
+  const [pinnedParty, setPinnedParty] = useState<string | null>(null)
+  const activeParty = hoverParty ?? pinnedParty
 
   const byId = useMemo(() => new Map(summaries.map((s) => [s.id, s])), [summaries])
-  const fill = useCallback((id: string) => fillFor(byId.get(id), colourBy), [byId, colourBy])
+  const fill = useCallback((id: string) => fillFor(byId.get(id), colourBy, activeParty), [byId, colourBy, activeParty])
   const hovered = hover ? byId.get(hover.id) : undefined
   const selectedWard = selectedWardId ? byId.get(selectedWardId) : undefined
   const focused = district ? districts.find((d) => d.name === district) : undefined
@@ -148,9 +181,9 @@ export default function App() {
         <header className="shrink-0 border-b bg-card/60 backdrop-blur">
           <div className="mx-auto flex max-w-[2560px] items-center justify-between gap-6 px-8 py-4">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Election predictions</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Gauteng 2026 local elections</h1>
               <p className="text-sm text-muted-foreground">
-                Forecast and live count, from the whole area down to each district and ward.
+                Forecast and live count (PR ballot), from all of Gauteng down to each municipality and ward.
                 {isSample && (
                   <span className="ml-2 text-amber-700 dark:text-amber-300">
                     Synthetic sample data: wards, districts, forecasts, past results and the count are all made up.
@@ -196,7 +229,8 @@ export default function App() {
           <PredictionOverview
             scope={scope}
             order={order}
-            title={focused ? `${focused.name} prediction` : "General prediction"}
+            title={focused ? `${focused.name} prediction` : "Gauteng prediction"}
+            council={!!focused}
             description={
               focused
                 ? `${focused.wardCount} wards · ${focused.municipalities.join(", ")}`
@@ -243,7 +277,13 @@ export default function App() {
                     onSelectDistrict={selectDistrict}
                   />
                 </div>
-                <MapLegend by={colourBy} />
+                <MapLegend
+                  by={colourBy}
+                  active={activeParty}
+                  pinned={pinnedParty}
+                  onHover={setHoverParty}
+                  onToggle={(p) => setPinnedParty((cur) => (cur === p ? null : p))}
+                />
               </CardContent>
             </Card>
 

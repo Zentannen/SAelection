@@ -1,16 +1,15 @@
-// Display config per party code. Only the main ward-winning parties get their
-// own colour on the map; everyone else shares "Other" so the map stays readable
-// (eight hues on one map can't all be told apart, especially with colour-blindness).
-// `ink` is the text colour for a label printed inside that party's fill.
+// Display config per party code. The Gauteng model forecasts five parties and
+// "Other": DA, ANC, ActionSA, MK and EFF get their own colour, every other party
+// is counted in "Other", in the forecast, the count and past results alike.
+// Names are always shown next to colours and the map legend can highlight one
+// party's wards. `ink` is the text colour for a label printed inside that party's fill.
 export const PARTIES: Record<string, { name: string; color?: string; ink?: string }> = {
-  ANC: { name: "African National Congress", color: "var(--party-anc)", ink: "#ffffff" },
+  // Order: 2026 Gauteng forecast, largest first.
   DA: { name: "Democratic Alliance", color: "var(--party-da)", ink: "#ffffff" },
+  ANC: { name: "African National Congress", color: "var(--party-anc)", ink: "#ffffff" },
+  ActionSA: { name: "ActionSA", color: "var(--party-actionsa)", ink: "#0b0b0b" },
   EFF: { name: "Economic Freedom Fighters", color: "var(--party-eff)", ink: "#ffffff" },
   MK: { name: "uMkhonto weSizwe", color: "var(--party-mk)", ink: "#ffffff" },
-  IFP: { name: "Inkatha Freedom Party", color: "var(--party-ifp)", ink: "#0b0b0b" },
-  PA: { name: "Patriotic Alliance" },
-  ActionSA: { name: "ActionSA", color: "var(--party-actionsa)", ink: "#ffffff" },
-  "FF+": { name: "Freedom Front Plus" },
 }
 
 export const OTHER = "Other"
