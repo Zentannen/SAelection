@@ -24,6 +24,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Use empty data for test deploys (not main)
+        if: github.ref != 'refs/heads/main'
+        run: |
+          rm -f public/data/history.json
+          echo '{"type":"FeatureCollection","features":[]}' > public/data/wards.geojson
+          echo '{"wards":{}}' > public/data/predictions.json
+          echo '{"wards":{}}' > public/data/results.json
       - run: npm run build
       - uses: actions/configure-pages@v5
         with:
