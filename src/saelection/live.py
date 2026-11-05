@@ -425,10 +425,20 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     wards = sorted(cw.ward.unique())
     widx = {w: j for j, w in enumerate(wards)}
     vidx = {v: i for i, v in enumerate(d.vd)}
+    # each VD belongs to exactly one ward, as the IEC reports it: the ward on the results file for
+    # counted VDs, else the IEC's official VD list (scripts/fetch_iec_vd_wards.py), else the
+    # geometry crosswalk's main ward. (The fractional geometry crosswalk mis-assigned VDs.)
+    from .bench.live_check import vd_wards
+    vd_ward = vd_wards(d.vd)
+    for v in counted_vds:
+        if ward_obs.get(v) in widx:
+            vd_ward[vidx[v]] = ward_obs[v]
     Wm = np.zeros((len(wards), d.n))
-    for r in cw.itertuples(index=False):
-        Wm[widx[r.ward], vidx[r.vd]] += r.ward_weight
-    wmeta = cw.groupby("ward").agg(muni=("muni", "first"), ward_no=("ward_no", "first"), n_vd=("vd", "nunique"))
+    for i, w in enumerate(vd_ward):
+        if w in widx:
+            Wm[widx[w], i] = 1.0
+    wmeta = cw.groupby("ward").agg(muni=("muni", "first"), ward_no=("ward_no", "first"))
+    wmeta["n_vd"] = Wm.sum(1).astype(int)
     munis = d.muni_codes
     Mm = np.zeros((len(munis), d.n))
     Mm[d.muni, np.arange(d.n)] = 1
@@ -482,7 +492,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     # ---- wards: projected draws, then counted part + projected remainder where only partial
     V_w = np.einsum("wn,snc->swc", Wm, votes)
     C_w = np.broadcast_to(Wm @ Yc, V_w.shape).astype(float).copy()
-    f_w = (Wm @ counted.astype(float)) / Wm.sum(1)
+    f_w = (Wm @ counted.astype(float)) / np.maximum(Wm.sum(1), 1)
     extra_w = np.zeros((len(wards), len(CATS)))
     lost = []
     for v, (w, row) in unmatched.items():
@@ -526,10 +536,11 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
     # ---- records
     nodes = pd.read_csv(PROCESSED / "vd_nodes_2026.csv").set_index("vd").reindex(d.vd)
     prim = cw.sort_values("ward_weight").groupby("vd").last().reindex(d.vd)
-    vd_extra = [{"muni": prim.muni.iloc[i], "ward": int(prim.ward.iloc[i]), "station": prim.station.iloc[i],
+    vd_extra = [{"muni": prim.muni.iloc[i], "ward": int(vd_ward[i]), "station": prim.station.iloc[i],
                  "lon": float(nodes.lon.iloc[i]), "lat": float(nodes.lat.iloc[i]),
                  "status": "counted" if counted[i] else "projected",
-                 "ward_pct_counted": round(100 * float(f_w[widx[int(prim.ward.iloc[i])]]), 1)} for i in range(d.n)]
+                 "ward_pct_counted": round(100 * float(f_w[widx[int(vd_ward[i])]]), 1) if int(vd_ward[i]) in widx else None}
+                for i in range(d.n)]
     vd_recs = summarise_units(votes, counted.astype(float), [int(v) for v in d.vd], vd_extra)
     w_extra = [{"muni": wmeta.muni[w], "ward_no": int(wmeta.ward_no[w]), "n_vd": int(wmeta.n_vd[w])} for w in wards]
     ward_recs = summarise_units(V_w, f_w, [int(w) for w in wards], w_extra, counted=C_w)
@@ -562,7 +573,7 @@ def run(n_draws=500, seed=0, out_dir: Path = OUT, method: str | None = None):
             "votes = projected FINAL votes (counted + still to come); counted_votes / remaining_votes split them.",
             "Counted VDs carry their actual result (p05 = p50 = p95). Projected VDs are posterior predictive draws.",
             "With ward-level progress only, a partially counted ward = its counted votes + (1 - pct counted) x its projection; VD records stay projections for the whole VD.",
-            "Ward totals allocate a split VD's votes to wards by each piece's share of registered voters.",
+            "Each VD counts in one ward, as the IEC reports it (results file for counted VDs, else the IEC VD list, else the geometry crosswalk).",
             "p_first = probability the party has the most PR votes in that unit.",
         ],
     }
