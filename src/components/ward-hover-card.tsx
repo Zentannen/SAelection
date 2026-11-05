@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { CircleCheck, CircleDashed, TriangleAlert } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -91,6 +91,16 @@ export function Verdict({ ward }: { ward: WardSummary }) {
 export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({ left: x, top: y })
+  // The card follows the pointer itself, so the rest of the page doesn't
+  // re-render on every mouse move. (x, y) seeds it when a new ward is entered,
+  // or comes from keyboard focus.
+  const [pointer, setPointer] = useState({ x, y })
+  useEffect(() => setPointer({ x, y }), [x, y])
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => setPointer({ x: e.clientX, y: e.clientY })
+    window.addEventListener("pointermove", onMove)
+    return () => window.removeEventListener("pointermove", onMove)
+  }, [])
 
   // Keep the card on-screen: flip left/up near the viewport edges.
   useLayoutEffect(() => {
@@ -98,12 +108,12 @@ export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y:
     if (!el) return
     const gap = 16
     const { offsetWidth: w, offsetHeight: h } = el
-    let left = x + gap
-    let top = y + gap
-    if (left + w > window.innerWidth - 8) left = x - w - gap
+    let left = pointer.x + gap
+    let top = pointer.y + gap
+    if (left + w > window.innerWidth - 8) left = pointer.x - w - gap
     if (top + h > window.innerHeight - 8) top = Math.max(8, window.innerHeight - h - 8)
     setPos({ left: Math.max(8, left), top })
-  }, [x, y, ward])
+  }, [pointer, ward])
 
   const { name, municipality, district } = ward.feature.properties
   const turnout = ward.registered && ward.votesCounted ? (ward.votesCounted / ward.registered) * 100 : undefined
@@ -132,7 +142,11 @@ export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y:
           <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Current result</span>
           {ward.status !== "not_started" && (
             <span className="text-xs text-muted-foreground tabular-nums">
-              {int(ward.votesCounted)} votes{turnout != null && ` · ${turnout.toFixed(0)}% turnout`}
+              {int(ward.votesCounted)} votes
+              {turnout != null &&
+                (ward.status === "final"
+                  ? ` · ${turnout.toFixed(0)}% turnout`
+                  : ` · ${turnout.toFixed(0)}% of registered so far`)}
             </span>
           )}
         </div>

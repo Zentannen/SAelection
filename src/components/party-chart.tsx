@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { MAIN_PARTIES, partyColor, partyName } from "@/parties"
@@ -11,7 +12,7 @@ const config = {
 /** Fold parties without their own colour into "Other", matching the map. */
 const bucket = (p?: string) => (p ? (MAIN_PARTIES.includes(p) ? p : "Other") : undefined)
 
-export function PartyChart({ wards }: { wards: WardSummary[] }) {
+export const PartyChart = memo(function PartyChart({ wards }: { wards: WardSummary[] }) {
   const counts = new Map<string, { predicted: number; leading: number }>()
   for (const key of [...MAIN_PARTIES, "Other"]) counts.set(key, { predicted: 0, leading: 0 })
   for (const w of wards) {
@@ -81,4 +82,4 @@ export function PartyChart({ wards }: { wards: WardSummary[] }) {
       </div>
     </div>
   )
-}
+})

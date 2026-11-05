@@ -1,8 +1,9 @@
+import { memo } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SegmentLegend, SegmentedBar } from "@/components/segmented-bar"
 import { ranked } from "@/data"
-import type { ScopeSummary } from "@/lib/model"
+import { holdingPct, rankedParties, type ScopeSummary } from "@/lib/model"
 import { partyColor, partyName } from "@/parties"
 
 const int = (n: number) => n.toLocaleString("en-ZA")
@@ -34,12 +35,12 @@ interface Props {
 }
 
 /** Headline prediction for the whole area, or for one district when it is selected. */
-export function PredictionOverview({ scope, title, description, order }: Props) {
-  const predicted = ranked(scope.predictedShares)
+export const PredictionOverview = memo(function PredictionOverview({ scope, title, description, order }: Props) {
+  const predicted = rankedParties(scope.predictedShares)
   const [leader, leaderShare = 0] = predicted[0] ?? []
   const [runnerUp, runnerUpShare = 0] = predicted[1] ?? []
   const majority = leaderShare > 50
-  const holding = scope.called ? Math.round((scope.hits / scope.called) * 100) : null
+  const holding = holdingPct(scope.hits, scope.called)
 
   const wins = ranked(scope.predictedWins).slice(0, 3)
 
@@ -85,7 +86,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
               <div className="flex items-baseline justify-between gap-4 text-sm desk:flex-col desk:items-start desk:gap-0.5">
                 <span className="font-medium">Predicted vote share</span>
                 <span className="text-xs text-muted-foreground">
-                  {scope.predictedSource === "model" ? "Model forecast" : `Built from ${int(scope.wardCount)} ward forecasts`}
+                  {scope.predictedSource === "model" ? "Model forecast" : `Built from ${int(scope.forecastWards)} ward forecasts`}
                 </span>
               </div>
               <SegmentedBar shares={scope.predictedShares} order={order} />
@@ -105,7 +106,7 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
                 </div>
               )}
             </div>
-            <SegmentLegend order={order} />
+            <SegmentLegend order={order} shares={[scope.predictedShares, scope.countedShares]} />
           </div>
 
           {/* Progress of the count against the forecast. */}
@@ -160,4 +161,4 @@ export function PredictionOverview({ scope, title, description, order }: Props) 
       </CardContent>
     </Card>
   )
-}
+})

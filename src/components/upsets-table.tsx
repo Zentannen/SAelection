@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { ArrowRight } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { partyColor } from "@/parties"
@@ -13,7 +14,7 @@ function Party({ code }: { code?: string }) {
   )
 }
 
-export function UpsetsTable({
+export const UpsetsTable = memo(function UpsetsTable({
   wards,
   onHoverWard,
   onSelectWard,
@@ -64,4 +65,4 @@ export function UpsetsTable({
       </TableBody>
     </Table>
   )
-}
+})

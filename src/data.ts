@@ -50,6 +50,12 @@ function rewind(fc: WardCollection): WardCollection {
       const clockwise = area(ring) > 0;
       if ((i === 0) !== clockwise) ring.reverse();
     });
+  // A feature with no geometry (or no ward_id) can't be drawn or matched; skip it rather than crash.
+  const usable = fc.features.filter((f) => f.geometry && f.properties?.ward_id);
+  if (usable.length < fc.features.length) {
+    console.warn(`Skipped ${fc.features.length - usable.length} ward feature(s) with no geometry or ward_id`);
+  }
+  fc.features = usable;
   for (const f of fc.features) {
     const g = f.geometry;
     if (g.type === 'Polygon') fixPolygon(g.coordinates);

@@ -11,7 +11,7 @@ A web app for following a municipal election forecast against the live count, at
 
   Pick a district (header menu, district list, or a click on the map) and the panel switches to that district's prediction.
 - **Districts.** District borders are drawn heavier than ward borders, and each district is labelled on the map. The **Districts** tab lists every district with its predicted largest party, forecast vs counted vote share, wards reporting, how often the prediction is holding, and upsets. Hovering a district outlines it on the map; clicking one zooms to it and fades the others. Press **Esc** or click **All districts** to zoom back out.
-- **Ward map.** Each ward is filled with its predicted winner's colour; darker shading means a more confident prediction. Scroll or pinch to zoom, drag to pan, or use the + / − / reset buttons. The **Current result** toggle recolours the map by who leads now.
+- **Ward map.** Each ward is filled with its predicted winner's colour; darker shading means a more confident prediction. Scroll or pinch to zoom, drag to pan, or use the + / − / reset buttons. The **Current result** toggle recolours the map by who leads now. The party chips under the map highlight one party's wards: hover to preview, click to pin.
 - **Hover card.** Hovering a ward shows its count status, votes and turnout, whether the leader matches the prediction, and each party's current share with a tick at its predicted share.
 - **Ward panel.** Clicking a ward opens its panel and zooms to its district. The panel has:
   - the current result against the prediction
@@ -22,7 +22,7 @@ A web app for following a municipal election forecast against the live count, at
 - **Parties and Upsets tabs.** Predicted ward wins against wards each party leads now, and the wards where someone other than the predicted winner leads. Both follow the selected district.
 - **Live updates.** `results.json` is reloaded every 60 seconds.
 
-The layout is designed for laptop and desktop screens.
+The layout is built for desktop screens. From 1600px wide the page fills the window in three columns (prediction, map, panels) and plain scrolling over the map zooms it. Narrower windows stack the panels and scroll the page, so there you zoom with Ctrl/⌘ + scroll or a trackpad pinch.
 
 ## Why it's being built
 
@@ -86,7 +86,9 @@ Change `WardID` to whatever the shapefile calls its ward code, and add the `dist
   "districts": { "City of Johannesburg": { "shares": { "ANC": 35.2, "DA": 29.8 } } } }
 ```
 
-`overall` and `districts` are optional. If your model produces its own area-wide or district figures, put them here and the app shows them as-is ("Model forecast"). Otherwise the app builds them from the ward forecasts: an average of each ward's predicted shares, weighted by registered voters (from `results.json`) when every ward has that figure, and counting each ward equally if not.
+`overall` and `districts` are optional. If your model produces its own area-wide or district figures, put them here and the app uses them ("Model forecast"). Otherwise the app builds them from the ward forecasts: an average of each ward's predicted shares, weighted by registered voters from `results.json`. A ward without a registered figure counts as an average-sized ward; with no registered figures at all, every ward counts equally.
+
+Shares are percentages of the vote. If a set adds up to less than 100, which is fine if you only list the main parties, the remainder is shown as **Other**. An unlisted remainder is never treated as the predicted winner.
 
 ### `results.json`: the live count
 
@@ -118,9 +120,13 @@ Ward boundaries change between elections, so past results must be mapped onto **
 
 ## Party colours
 
-Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). Only the main ward-winning parties (ANC, DA, EFF, MK, IFP, ActionSA) get their own colour. Every other party is shown in a shared grey **Other** colour on the map, bars and charts, because eight colours can't all be told apart reliably, especially by colour-blind readers. Party names always appear next to the colour in hover cards, tooltips, legends and tables.
+Parties and colours are set in `src/parties.ts` and `src/index.css` (`--party-*`). The ten largest parties (2024 national vote order: ANC, DA, MK, EFF, IFP, PA, FF+, ActionSA, ACDP, UDM) each get their own colour; every other party shares a grey **Other**. **Party codes in the data files must match the keys in `src/parties.ts` exactly** (for example `FF+`, `ActionSA`). An unrecognised code still works, but it is shown as Other.
 
-The ANC, DA, EFF, MK and IFP colours follow each party's usual colour and ActionSA is shown in teal; all were adjusted in lightness to stay distinguishable and were checked with a colour-blindness validator. The closest pair is MK and ANC for red-blind (protan) readers, which is acceptable only because names are always shown alongside. Re-check if you change the colours.
+Ten colours can't all be told apart by colour alone, especially by colour-blind readers, so:
+- party names always appear next to the colour (hover cards, tooltips, legends, tables)
+- the map legend chips highlight one party's wards: hover to preview, click to pin
+
+The ANC, DA, EFF, MK and IFP colours follow each party's usual colour, and ActionSA is teal. PA (violet), FF+ (rust), ACDP (navy) and UDM (fuchsia) were chosen by searching for the four colours furthest from the existing six under normal and colour-blind vision. Change any of them in `src/index.css`.
 
 ## Project layout
 

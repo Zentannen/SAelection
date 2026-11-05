@@ -1,11 +1,11 @@
-import { ranked } from "@/data"
+import { memo } from "react"
 import { SegmentedBar } from "@/components/segmented-bar"
-import type { DistrictSummary } from "@/lib/model"
+import { holdingPct, rankedParties, type DistrictSummary } from "@/lib/model"
 import { cn } from "@/lib/utils"
 import { partyColor, partyName } from "@/parties"
 
 /** One row per district: its prediction, the count so far, and progress. Click to focus it. */
-export function DistrictList({
+export const DistrictList = memo(function DistrictList({
   districts,
   selected,
   order,
@@ -22,10 +22,10 @@ export function DistrictList({
     return <p className="py-6 text-center text-sm text-muted-foreground">No districts in the ward data.</p>
   }
   return (
-    <div className="grid gap-2" onMouseLeave={() => onHover(null)}>
+    <div className="grid min-w-0 grid-cols-1 gap-2" onMouseLeave={() => onHover(null)}>
       {districts.map((d) => {
-        const [leader, share = 0] = ranked(d.predictedShares)[0] ?? []
-        const holding = d.called ? Math.round((d.hits / d.called) * 100) : null
+        const [leader, share = 0] = rankedParties(d.predictedShares)[0] ?? []
+        const holding = holdingPct(d.hits, d.called)
         const active = selected === d.name
         return (
           <button
@@ -37,19 +37,21 @@ export function DistrictList({
             onFocus={() => onHover(d.name)}
             onBlur={() => onHover(null)}
             className={cn(
-              "grid gap-2.5 rounded-lg border p-3 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              "grid min-w-0 gap-2.5 rounded-lg border p-3 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-ring/50",
               active && "border-foreground/40 bg-accent/60",
             )}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="truncate font-medium">{d.name}</div>
+                <div className="truncate font-medium" title={d.name}>
+                  {d.name}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   {d.wardCount} wards · {d.municipalities.length} {d.municipalities.length === 1 ? "municipality" : "municipalities"}
                 </div>
               </div>
               {leader && (
-                <div className="text-right" title={`Predicted largest party: ${partyName(leader)}`}>
+                <div className="shrink-0 text-right" title={`Predicted largest party: ${partyName(leader)}`}>
                   <div className="flex items-center justify-end gap-1.5 font-semibold">
                     <span className="size-2.5 rounded-[3px]" style={{ background: partyColor(leader) }} />
                     {leader} <span className="tabular-nums">{share.toFixed(1)}%</span>
@@ -84,4 +86,4 @@ export function DistrictList({
       })}
     </div>
   )
-}
+})

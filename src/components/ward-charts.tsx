@@ -14,7 +14,7 @@ import {
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart"
 import { bucketShares } from "@/components/segmented-bar"
 import type { WardSummary } from "@/lib/model"
-import { OTHER, partyColor, partyName } from "@/parties"
+import { MAIN_PARTIES, OTHER, partyColor, partyName } from "@/parties"
 import type { Election, Shares } from "@/types"
 
 const pct = (n: number) => `${n.toFixed(1)}%`
@@ -27,15 +27,32 @@ const shareOf = (votes: Record<string, number>): Shares => {
   return Object.fromEntries(Object.entries(votes).map(([p, v]) => [p, total ? (v / total) * 100 : 0]))
 }
 
+/** Count updates with at least one vote (an all-zero update has no shares to plot). */
+const countedUpdates = (ward: WardSummary) =>
+  ward.timeline
+    .map((u) => ({ t: Date.parse(u.at), total: Object.values(u.votes).reduce((a, b) => a + b, 0), shares: shareOf(u.votes) }))
+    .filter((u) => u.total > 0 && Number.isFinite(u.t))
+
+export type WardSeries = ReturnType<typeof wardSeries>
+
 /**
- * Which parties get their own line for this ward: those with their own colour
- * that reach 3% somewhere in the ward's data. Everyone else is folded into
- * "Other", so the chart never has two lines of the same colour.
+ * Which parties get their own line in this ward's charts: any party with its
+ * own colour that reaches 3% anywhere in the ward's data (past results,
+ * forecast, count, or any count update). Everyone else is folded into
+ * "Other", so no two lines share a colour. Computed once per ward so both
+ * charts show the same parties.
  */
-function seriesFor(sets: Shares[], order: string[]) {
+export function wardSeries(ward: WardSummary, elections: Election[], order: string[]) {
+  const sets: Shares[] = [
+    ...elections.map((e) => ward.history?.[e.id]).filter((s): s is Shares => !!s),
+    ...(ward.predictedShares ? [ward.predictedShares] : []),
+    ...(ward.status !== "not_started" ? [shareOf(ward.votes)] : []),
+    ...countedUpdates(ward).map((u) => u.shares),
+  ]
   const peak: Record<string, number> = {}
   for (const s of sets) for (const [p, v] of Object.entries(bucketShares(s))) peak[p] = Math.max(peak[p] ?? 0, v)
-  const keep = order.filter((p) => p !== OTHER && (peak[p] ?? 0) >= 3)
+  const candidates = [...order, ...MAIN_PARTIES.filter((p) => !order.includes(p))]
+  const keep = candidates.filter((p) => p !== OTHER && (peak[p] ?? 0) >= 3)
   const fold = (s: Shares): Shares => {
     const b = bucketShares(s)
     const out: Shares = {}
@@ -60,19 +77,15 @@ const niceMax = (values: number[]) => Math.min(100, Math.max(20, Math.ceil(Math.
 const configFor = (parties: string[]): ChartConfig =>
   Object.fromEntries(parties.map((p) => [p, { label: p, color: partyColor(p) }]))
 
-/** End-of-line / single-point marker: filled, with a ring in the surface colour. */
+/**
+ * Markers. Filled (with a ring in the surface colour) for real results;
+ * hollow and larger for the forecast, so a counted dot at the same spot sits
+ * inside the forecast ring instead of hiding it.
+ */
 function Marker({ cx, cy, color, hollow }: { cx?: number; cy?: number; color: string; hollow?: boolean }) {
   if (cx == null || cy == null) return null
-  return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={hollow ? 4 : 4.5}
-      fill={hollow ? "var(--card)" : color}
-      stroke={hollow ? color : "var(--card)"}
-      strokeWidth={2}
-    />
-  )
+  if (hollow) return <circle cx={cx} cy={cy} r={6.5} fill="none" stroke={color} strokeWidth={2} />
+  return <circle cx={cx} cy={cy} r={4.5} fill={color} stroke="var(--card)" strokeWidth={2} />
 }
 
 function TooltipCard({ title, subtitle, rows }: { title: string; subtitle?: string; rows: { party: string; value: string }[] }) {
@@ -191,22 +204,35 @@ function TrendLines({
 export function ElectionsChart({
   ward,
   elections,
-  order,
+  series,
   year = "2026",
 }: {
   ward: WardSummary
   elections: Election[]
-  order: string[]
+  series: WardSeries
   year?: string
 }) {
+  if (!elections.length) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Past results aren't loaded. Add <code className="text-xs">history.json</code> to see each ward's trend; the 2026
+        forecast against the count is shown above.
+      </p>
+    )
+  }
   const past = elections.filter((e) => ward.history?.[e.id])
   if (!past.length) {
-    return <p className="text-sm text-muted-foreground">No past results for this ward (it may be new since the last boundary changes).</p>
+    return (
+      <p className="text-sm text-muted-foreground">
+        No past results for this ward (it may be new since the last boundary changes). The 2026 forecast against the
+        count is shown above.
+      </p>
+    )
   }
 
   const counted = ward.status !== "not_started" ? shareOf(ward.votes) : undefined
   const sets = [...past.map((e) => ward.history![e.id]), ...(ward.predictedShares ? [ward.predictedShares] : []), ...(counted ? [counted] : [])]
-  const { parties, fold } = seriesFor(sets, order)
+  const { parties, fold } = series
 
   type Row = Record<string, number | string | undefined> & { x: string }
   const rows: Row[] = past.map((e) => {
@@ -257,10 +283,11 @@ export function ElectionsChart({
               )
             }}
           />
-          {/* Invisible series: they only feed the tooltip. TrendLines draws the visible lines. */}
-          {parties.map((p) => (
-            <Line key={`${p}:past`} dataKey={`${p}:past`} stroke="none" dot={false} activeDot={false} isAnimationActive={false} />
-          ))}
+          {/* Invisible series: they only feed the tooltip (past and forecast columns). TrendLines draws the visible lines. */}
+          {parties.flatMap((p) => [
+            <Line key={`${p}:past`} dataKey={`${p}:past`} stroke="none" dot={false} activeDot={false} isAnimationActive={false} />,
+            <Line key={`${p}:fc`} dataKey={`${p}:fc`} stroke="none" dot={false} activeDot={false} isAnimationActive={false} />,
+          ])}
           <TrendLines
             parties={parties}
             points={parties.map((p) => rows.map((r) => (typeof r[`${p}:past`] === "number" ? (r[`${p}:past`] as number) : r.x === year ? (r[`${p}:fc`] as number | undefined) : undefined)))}
@@ -303,25 +330,26 @@ export function ElectionsChart({
 }
 
 /** Running vote share as votes were counted on election night. */
-export function CountChart({ ward, order }: { ward: WardSummary; order: string[] }) {
+export function CountChart({ ward, series }: { ward: WardSummary; series: WardSeries }) {
   if (ward.status === "not_started") {
     return <p className="text-sm text-muted-foreground">No votes counted yet.</p>
   }
-  if (ward.timeline.length < 2) {
+  const updates = countedUpdates(ward)
+  if (updates.length < 2) {
     return (
       <p className="text-sm text-muted-foreground">
-        {ward.timeline.length ? "Only one results update so far." : "No count timeline in the results feed for this ward."}
+        {updates.length ? "Only one results update so far." : "No count timeline in the results feed for this ward."}
       </p>
     )
   }
 
-  const updates = ward.timeline.map((u) => ({ t: Date.parse(u.at), shares: shareOf(u.votes), total: Object.values(u.votes).reduce((a, b) => a + b, 0) }))
-  const { parties, fold } = seriesFor(
-    [...updates.map((u) => u.shares), ...(ward.predictedShares ? [ward.predictedShares] : [])],
-    order,
-  )
+  const { parties, fold } = series
   const forecast = ward.predictedShares ? fold(ward.predictedShares) : {}
-  const rows = updates.map((u) => ({ t: u.t, total: u.total, ...fold(u.shares) }))
+  // A party absent from an update simply had no votes counted yet: 0%, not a gap.
+  const rows = updates.map((u) => {
+    const f = fold(u.shares)
+    return { t: u.t, total: u.total, ...Object.fromEntries(parties.map((p) => [p, f[p] ?? 0])) }
+  })
   const max = niceMax(rows.flatMap((r) => parties.map((p) => Number(r[p as keyof typeof r] ?? 0))))
   const lastIndex = rows.length - 1
 
