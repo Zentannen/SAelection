@@ -86,7 +86,7 @@ Overwrite this file as results arrive. The app picks up the new file within a mi
 
 ## Coalition scenario plan
 
-[`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md) sets out how different 2026 results could turn into governments in Johannesburg, Tshwane and Ekurhuleni, and what each outcome means for the Gauteng provincial government: the seat thresholds, what each party believes and needs, national-government pressure, metro-by-metro scenarios, and international precedents.
+[`analysis/gauteng-coalition-game-plan.md`](analysis/gauteng-coalition-game-plan.md) is a coalition scenario playbook built from comparative cases, mostly Central and Eastern Europe. It sets out what governments formed under different vote-share configurations and party values, how long they lasted and why, then maps those patterns onto Johannesburg, Tshwane, Ekurhuleni and the Gauteng provincial government.
 
 ## Party colours
 
