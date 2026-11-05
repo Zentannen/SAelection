@@ -17,7 +17,7 @@ export function ShareBars({ ward, limit = 5 }: { ward: WardSummary; limit?: numb
   const scale = (v: number) => `${(v / Math.max(max * 1.08, 50)) * 100}%`
 
   return (
-    <div className="grid gap-2">
+    <div className="grid min-w-0 grid-cols-1 gap-2">
       {rows.map((r) => (
         <div key={r.party} className="grid grid-cols-[4.5rem_1fr_3rem] items-center gap-2.5 text-xs">
           <span className="flex min-w-0 items-center gap-1.5" title={partyName(r.party)}>
@@ -68,7 +68,7 @@ export function ShareBars({ ward, limit = 5 }: { ward: WardSummary; limit?: numb
   )
 }
 
-function Verdict({ ward }: { ward: WardSummary }) {
+export function Verdict({ ward }: { ward: WardSummary }) {
   if (!ward.leader || !ward.predictedWinner) return null
   const done = ward.status === "final"
   if (!ward.upset) {
@@ -105,7 +105,7 @@ export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y:
     setPos({ left: Math.max(8, left), top })
   }, [x, y, ward])
 
-  const { name, municipality } = ward.feature.properties
+  const { name, municipality, district } = ward.feature.properties
   const turnout = ward.registered && ward.votesCounted ? (ward.votesCounted / ward.registered) * 100 : undefined
 
   return (
@@ -119,7 +119,7 @@ export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y:
         <div className="min-w-0">
           <h3 className="truncate leading-tight font-semibold">{name ?? ward.id}</h3>
           <p className="truncate text-xs text-muted-foreground">
-            {[municipality, ward.id].filter(Boolean).join(" · ")}
+            {[municipality, district].filter(Boolean).join(" · ") || ward.id}
           </p>
         </div>
         <StatusBadge status={ward.status} />
@@ -163,6 +163,7 @@ export function WardHoverCard({ ward, x, y }: { ward: WardSummary; x: number; y:
           </div>
         </>
       )}
+      <p className="mt-3 text-[11px] text-muted-foreground">Click for vote share over time</p>
     </div>
   )
 }

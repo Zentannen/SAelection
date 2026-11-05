@@ -1,4 +1,4 @@
-import type { PredictionsFile, ResultsFile, Shares, WardCollection, WardResult } from '@/types';
+import type { HistoryFile, PredictionsFile, ResultsFile, Shares, WardCollection, WardResult } from '@/types';
 
 const BASE = `${import.meta.env.BASE_URL}data/`;
 
@@ -12,6 +12,12 @@ async function getJson<T>(file: string): Promise<T> {
 export const loadWards = () => getJson<WardCollection>('wards.geojson').then(rewind);
 export const loadPredictions = () => getJson<PredictionsFile>('predictions.json');
 export const loadResults = () => getJson<ResultsFile>('results.json');
+/** history.json is optional: a missing file just means no past-election charts. */
+export const loadHistory = () =>
+  getJson<HistoryFile>('history.json').catch((err) => {
+    console.info('No past-election history loaded:', err.message);
+    return null;
+  });
 
 /** Parties sorted by share, highest first. */
 export function ranked(shares: Shares): [string, number][] {

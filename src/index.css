@@ -32,8 +32,10 @@
   --party-mk: #a16207;
   --party-ifp: #fb923c;
   --party-other: #a3a3a3;
+  --party-other-ink: #0b0b0b;
   --ward-boundary: oklch(1 0 0 / 0.85);
   --area-boundary: oklch(0.45 0 0);
+  --district-boundary: oklch(0.2 0 0 / 0.85);
 
   /* Status (never used for parties; always paired with an icon + label). */
   --good: #0ca30c;
@@ -62,8 +64,10 @@
 
   --party-anc: #15803d;
   --party-other: #737373;
+  --party-other-ink: #ffffff;
   --ward-boundary: oklch(0.145 0 0 / 0.8);
   --area-boundary: oklch(0.75 0 0);
+  --district-boundary: oklch(0.97 0 0 / 0.9);
   --good: #3fcf5c;
   --critical: #f07171;
 }
@@ -114,6 +118,15 @@
   transition: fill 300ms ease, fill-opacity 300ms ease;
   outline: none;
 }
+.ward-selected {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--card) 90%, transparent));
+}
 .area-outline {
   fill: none;
   stroke: var(--area-boundary);
@@ -130,3 +143,44 @@
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
+
+/* District borders: heavier than ward lines, constant width at any zoom. */
+.district-border {
+  fill: none;
+  stroke: var(--district-boundary);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+.district-focus,
+.district-highlight {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+.district-focus { stroke-width: 2.5; }
+.district-highlight { stroke-width: 3; }
+
+/* Wards outside the focused district fade back. */
+.ward.dimmed { opacity: 0.22; }
+
+/* District names counter-scale with --k (the zoom factor) so they stay the same size on screen. */
+.district-label {
+  font-size: calc(11px / var(--k, 1));
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--foreground);
+  stroke: var(--card);
+  stroke-width: calc(3.5px / var(--k, 1));
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+.district-label.dimmed { opacity: 0.35; }

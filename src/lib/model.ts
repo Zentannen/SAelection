@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { loadPredictions, loadResults, loadWards, ranked, resultShares } from "@/data"
-import type { PredictionsFile, ResultsFile, ResultStatus, WardCollection, WardFeature } from "@/types"
+import { loadHistory, loadPredictions, loadResults, loadWards, ranked, resultShares } from "@/data"
+import type { CountUpdate, HistoryFile, PredictionsFile, ResultsFile, ResultStatus, Shares, WardCollection, WardFeature } from "@/types"
 
 export const RESULTS_POLL_MS = 60_000
 
@@ -15,9 +15,14 @@ export interface PartyRow {
 export interface WardSummary {
   feature: WardFeature
   id: string
+  district?: string
   status: ResultStatus
+  /** Predicted shares straight from predictions.json (0–100). */
+  predictedShares?: Shares
   predictedWinner?: string
   confidence?: number
+  /** Raw vote counts so far (empty when no result yet). */
+  votes: Record<string, number>
   leader?: string
   /** Leader's lead over second place, percentage points. */
   leadMargin?: number
@@ -27,9 +32,18 @@ export interface WardSummary {
   rows: PartyRow[]
   /** true when there is a leader and they differ from the predicted winner. */
   upset: boolean
+  /** Cumulative counts at each results update on election night, oldest first. */
+  timeline: CountUpdate[]
+  /** Past election id -> vote share (0–100), from history.json. */
+  history?: Record<string, Shares>
 }
 
-export function summarise(f: WardFeature, predictions: PredictionsFile, results: ResultsFile): WardSummary {
+export function summarise(
+  f: WardFeature,
+  predictions: PredictionsFile,
+  results: ResultsFile,
+  history?: HistoryFile | null,
+): WardSummary {
   const id = f.properties.ward_id
   const pred = predictions.wards[id]
   const res = results.wards[id]
@@ -54,31 +68,129 @@ export function summarise(f: WardFeature, predictions: PredictionsFile, results:
   return {
     feature: f,
     id,
+    district: f.properties.district || undefined,
     status: hasResult ? res.status : "not_started",
+    predictedShares: pred?.shares,
     predictedWinner,
     confidence: pred?.confidence,
+    votes: hasResult ? res.votes : {},
     leader,
     leadMargin,
     votesCounted: total,
     registered: res?.registered,
     rows,
     upset: !!leader && !!predictedWinner && leader !== predictedWinner,
+    timeline: hasResult ? (res.timeline ?? []) : [],
+    history: history?.wards[id],
   }
+}
+
+/** Prediction + live count rolled up over a set of wards (the whole area or one district). */
+export interface ScopeSummary {
+  wardCount: number
+  reporting: number
+  final: number
+  /** Reporting wards that have both a leader and a predicted winner. */
+  called: number
+  /** Called wards where the leader is the predicted winner. */
+  hits: number
+  upsets: number
+  /** Predicted vote share (0–100) for the scope. */
+  predictedShares: Shares
+  /** "model" when predictions.json supplied the figure, "wards" when built from ward predictions. */
+  predictedSource: "model" | "wards"
+  /** Share (0–100) of all votes counted so far in the scope. */
+  countedShares: Shares
+  votesCounted: number
+  /** Number of wards each party is predicted to win / currently leads. */
+  predictedWins: Record<string, number>
+  leadingWins: Record<string, number>
+}
+
+/**
+ * Roll ward figures up to a scope. Predicted shares are a weighted average of
+ * ward predictions, weighted by registered voters when every ward has that
+ * figure (otherwise each ward counts equally), unless the model supplied its
+ * own figure for the scope.
+ */
+export function aggregate(wards: WardSummary[], modelShares?: Shares): ScopeSummary {
+  const reporting = wards.filter((w) => w.status !== "not_started")
+  const called = reporting.filter((w) => w.leader && w.predictedWinner)
+  const hits = called.filter((w) => !w.upset).length
+
+  const predicted = wards.filter((w) => w.predictedShares)
+  const useRegistered = predicted.length > 0 && predicted.every((w) => (w.registered ?? 0) > 0)
+  const sums: Shares = {}
+  let weightTotal = 0
+  for (const w of predicted) {
+    const weight = useRegistered ? w.registered! : 1
+    weightTotal += weight
+    for (const [p, s] of Object.entries(w.predictedShares!)) sums[p] = (sums[p] ?? 0) + s * weight
+  }
+  const wardShares: Shares = {}
+  for (const [p, s] of Object.entries(sums)) wardShares[p] = weightTotal ? s / weightTotal : 0
+
+  const votes: Record<string, number> = {}
+  let votesCounted = 0
+  for (const w of reporting) {
+    for (const [p, v] of Object.entries(w.votes)) {
+      votes[p] = (votes[p] ?? 0) + v
+      votesCounted += v
+    }
+  }
+  const countedShares: Shares = {}
+  for (const [p, v] of Object.entries(votes)) countedShares[p] = votesCounted ? (v / votesCounted) * 100 : 0
+
+  const tally = (pick: (w: WardSummary) => string | undefined) => {
+    const t: Record<string, number> = {}
+    for (const w of wards) {
+      const p = pick(w)
+      if (p) t[p] = (t[p] ?? 0) + 1
+    }
+    return t
+  }
+
+  return {
+    wardCount: wards.length,
+    reporting: reporting.length,
+    final: reporting.filter((w) => w.status === "final").length,
+    called: called.length,
+    hits,
+    upsets: called.length - hits,
+    predictedShares: modelShares ?? wardShares,
+    predictedSource: modelShares ? "model" : "wards",
+    countedShares,
+    votesCounted,
+    predictedWins: tally((w) => w.predictedWinner),
+    leadingWins: tally((w) => w.leader),
+  }
+}
+
+export interface DistrictSummary extends ScopeSummary {
+  name: string
+  wards: WardSummary[]
+  municipalities: string[]
 }
 
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; wards: WardCollection; predictions: PredictionsFile; results: ResultsFile }
+  | {
+      status: "ready"
+      wards: WardCollection
+      predictions: PredictionsFile
+      results: ResultsFile
+      history: HistoryFile | null
+    }
 
 export function useElectionData() {
   const [state, setState] = useState<State>({ status: "loading" })
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([loadWards(), loadPredictions(), loadResults()])
-      .then(([wards, predictions, results]) => {
-        if (!cancelled) setState({ status: "ready", wards, predictions, results })
+    Promise.all([loadWards(), loadPredictions(), loadResults(), loadHistory()])
+      .then(([wards, predictions, results, history]) => {
+        if (!cancelled) setState({ status: "ready", wards, predictions, results, history })
       })
       .catch((err: Error) => !cancelled && setState({ status: "error", message: err.message }))
 
@@ -101,10 +213,35 @@ export function useElectionData() {
   const summaries = useMemo(
     () =>
       state.status === "ready"
-        ? state.wards.features.map((f) => summarise(f, state.predictions, state.results))
+        ? state.wards.features.map((f) => summarise(f, state.predictions, state.results, state.history))
         : [],
     [state],
   )
 
-  return { state, summaries }
+  const predictions = state.status === "ready" ? state.predictions : undefined
+
+  const overall = useMemo(() => aggregate(summaries, predictions?.overall?.shares), [summaries, predictions])
+
+  const districts = useMemo(() => {
+    const groups = new Map<string, WardSummary[]>()
+    for (const w of summaries) {
+      if (!w.district) continue
+      if (!groups.has(w.district)) groups.set(w.district, [])
+      groups.get(w.district)!.push(w)
+    }
+    return [...groups.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(
+        ([name, wards]): DistrictSummary => ({
+          ...aggregate(wards, predictions?.districts?.[name]?.shares),
+          name,
+          wards,
+          municipalities: [...new Set(wards.map((w) => w.feature.properties.municipality).filter((m): m is string => !!m))],
+        }),
+      )
+  }, [summaries, predictions])
+
+  const elections = state.status === "ready" ? (state.history?.elections ?? []) : []
+
+  return { state, summaries, overall, districts, elections }
 }

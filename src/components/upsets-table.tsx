@@ -16,9 +16,11 @@ function Party({ code }: { code?: string }) {
 export function UpsetsTable({
   wards,
   onHoverWard,
+  onSelectWard,
 }: {
   wards: WardSummary[]
   onHoverWard: (id: string | null) => void
+  onSelectWard: (id: string) => void
 }) {
   const upsets = wards.filter((w) => w.upset).sort((a, b) => (b.leadMargin ?? 0) - (a.leadMargin ?? 0))
 
@@ -40,11 +42,14 @@ export function UpsetsTable({
             key={w.id}
             onMouseEnter={() => onHoverWard(w.id)}
             onMouseLeave={() => onHoverWard(null)}
-            className="cursor-default"
+            onClick={() => onSelectWard(w.id)}
+            className="cursor-pointer"
           >
             <TableCell>
               <div className="font-medium">{w.feature.properties.name ?? w.id}</div>
-              <div className="text-xs text-muted-foreground">{w.status === "final" ? "Final" : "Counting"}</div>
+              <div className="text-xs text-muted-foreground">
+                {[w.district, w.status === "final" ? "Final" : "Counting"].filter(Boolean).join(" · ")}
+              </div>
             </TableCell>
             <TableCell className="text-right">
               <span className="inline-flex items-center gap-2">
